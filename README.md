@@ -1,4 +1,4 @@
-<p align="center"><img src="edock_logo.png" width="300" alt="Logo"></p>
+<p align="center"><img src="edock_logo.jpg" width="300" alt="Logo"></p>
 
 **Build, discover, install, and run Python apps from source code.**
 
