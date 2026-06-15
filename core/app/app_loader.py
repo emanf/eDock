@@ -1,10 +1,10 @@
 import importlib.util
 import json
 import sys
+import types
 
 from core.app.app_logging import print_and_log, safe_app_call
 from core.paths import APPS_DIR, get_root_dir
-
 
 class AppLoader:
     def __init__(self, app_context, config_manager):
@@ -21,8 +21,13 @@ class AppLoader:
                 try:
                     if hasattr(self.config_manager, "load"):
                         self.config_manager.load()
-                except Exception:
-                    pass
+                except Exception as e:
+                    print_and_log(
+                        message="Config manager load failed",
+                        exc=e,
+                        app_id=None,
+                        source="AppLoader",
+                    )
 
                 if hasattr(self.config_manager, "data") and isinstance(self.config_manager.data, dict):
                     apps_cfg = self.config_manager.data.get("apps", {})
@@ -32,6 +37,13 @@ class AppLoader:
             print_and_log(
                 message="Failed to read apps from config manager",
                 exc=e,
+                app_id=None,
+                source="AppLoader",
+            )
+
+        if not apps_cfg:
+            print_and_log(
+                message="No apps found in config manager data",
                 app_id=None,
                 source="AppLoader",
             )
@@ -50,6 +62,11 @@ class AppLoader:
         for app_id, app_cfg in sorted_items:
             try:
                 if isinstance(app_cfg, dict) and not bool(app_cfg.get("enabled", True)):
+                    print_and_log(
+                        message=f"Skipping disabled app '{app_id}'",
+                        app_id=app_id,
+                        source="AppLoader",
+                    )
                     continue
 
                 app_dir = self._find_app_dir_by_id(app_id)
@@ -63,6 +80,11 @@ class AppLoader:
 
                 app_data = self._load_single_app(app_dir)
                 if app_data is None:
+                    print_and_log(
+                        message=f"App failed to load: '{app_id}'",
+                        app_id=app_id,
+                        source="AppLoader",
+                    )
                     continue
 
                 try:
@@ -84,6 +106,12 @@ class AppLoader:
                     )
 
                 apps.append(app_data)
+
+                print_and_log(
+                    message=f"Loaded app '{app_id}'",
+                    app_id=app_id,
+                    source="AppLoader",
+                )
 
             except Exception as e:
                 print_and_log(
@@ -108,11 +136,21 @@ class AppLoader:
             candidate = APPS_DIR / app_id
             if candidate.exists() and candidate.is_dir():
                 return candidate
-        except Exception:
-            pass
+        except Exception as e:
+            print_and_log(
+                message=f"Failed checking direct app path for '{app_id}'",
+                exc=e,
+                app_id=app_id,
+                source="AppLoader",
+            )
 
         try:
             if not APPS_DIR.exists():
+                print_and_log(
+                    message=f"APPS_DIR does not exist: '{APPS_DIR}'",
+                    app_id=app_id,
+                    source="AppLoader",
+                )
                 return None
 
             for app_dir in APPS_DIR.iterdir():
@@ -126,13 +164,24 @@ class AppLoader:
                 try:
                     with open(manifest_path, "r", encoding="utf-8") as f:
                         manifest = json.load(f)
-                except Exception:
+                except Exception as e:
+                    print_and_log(
+                        message=f"Failed reading manifest while searching app '{app_id}'",
+                        exc=e,
+                        app_id=app_id,
+                        source="AppLoader",
+                    )
                     continue
 
                 if manifest.get("id") == app_id:
                     return app_dir
-        except Exception:
-            pass
+        except Exception as e:
+            print_and_log(
+                message=f"Failed searching APPS_DIR for '{app_id}'",
+                exc=e,
+                app_id=app_id,
+                source="AppLoader",
+            )
 
         return None
 
@@ -153,7 +202,20 @@ class AppLoader:
         manifest_path = app_dir / "app.json"
         app_py_path = app_dir / "app.py"
 
-        if not manifest_path.exists() or not app_py_path.exists():
+        if not manifest_path.exists():
+            print_and_log(
+                message=f"Missing app.json: '{manifest_path}'",
+                app_id=app_dir.name,
+                source="AppLoader",
+            )
+            return None
+
+        if not app_py_path.exists():
+            print_and_log(
+                message=f"Missing app.py: '{app_py_path}'",
+                app_id=app_dir.name,
+                source="AppLoader",
+            )
             return None
 
         app_id = app_dir.name
@@ -224,6 +286,11 @@ class AppLoader:
 
         app_class = self._load_app_class(app_py_path, app_id)
         if app_class is None:
+            print_and_log(
+                message=f"No App class found in '{app_py_path}'",
+                app_id=app_id,
+                source="AppLoader",
+            )
             return None
 
         return {
@@ -240,29 +307,62 @@ class AppLoader:
 
     def _load_app_class(self, app_py_path, app_id):
         try:
-            module_name = f"edock_app_{str(app_id).replace('/', '_').replace('-', '_').replace('.', '_')}"
+            module_base = (
+                f"edock_app_{str(app_id).replace('/', '_').replace('-', '_').replace('.', '_')}"
+            )
+            package_name = f"{module_base}_pkg"
+            module_name = f"{package_name}.app"
+
             spec = importlib.util.spec_from_file_location(
                 module_name,
                 str(app_py_path),
             )
 
             if spec is None or spec.loader is None:
+                print_and_log(
+                    message=f"Could not create module spec for '{app_py_path}'",
+                    app_id=app_id,
+                    source="AppLoader",
+                )
                 return None
 
-            module = importlib.util.module_from_spec(spec)
             inserted = False
             try:
                 root = str(get_root_dir())
             except Exception:
                 root = None
 
-            if root:
-                if root not in sys.path:
-                    sys.path.insert(0, root)
-                    inserted = True
+            if root and root not in sys.path:
+                sys.path.insert(0, root)
+                inserted = True
+
+            package = types.ModuleType(package_name)
+            package.__path__ = [str(app_py_path.parent)]
+            package.__package__ = package_name
+
+            module = importlib.util.module_from_spec(spec)
+            module.__package__ = package_name
+
+            old_package = sys.modules.get(package_name)
+            old_module = sys.modules.get(module_name)
+
+            sys.modules[package_name] = package
+            sys.modules[module_name] = module
 
             try:
                 spec.loader.exec_module(module)
+            except Exception:
+                if old_package is not None:
+                    sys.modules[package_name] = old_package
+                else:
+                    sys.modules.pop(package_name, None)
+
+                if old_module is not None:
+                    sys.modules[module_name] = old_module
+                else:
+                    sys.modules.pop(module_name, None)
+
+                raise
             finally:
                 if inserted:
                     try:
@@ -270,7 +370,15 @@ class AppLoader:
                     except Exception:
                         pass
 
-            return getattr(module, "App", None)
+            app_class = getattr(module, "App", None)
+            if app_class is None:
+                print_and_log(
+                    message=f"Module loaded but App class was not found: '{app_py_path}'",
+                    app_id=app_id,
+                    source="AppLoader",
+                )
+
+            return app_class
 
         except Exception as e:
             print_and_log(
@@ -288,22 +396,48 @@ class AppLoader:
         app_dir = app_data.get("app_dir")
 
         if app_class is None:
+            print_and_log(
+                message=f"Cannot create instance for '{app_id}': app_class is None",
+                app_id=app_id,
+                source="AppLoader",
+            )
             return None
 
         constructors = [
-            lambda: app_class(self.app_context, manifest, app_dir),
-            lambda: app_class(self.app_context),
-            lambda: app_class(),
+            ("app_context, manifest, app_dir", lambda: app_class(self.app_context, manifest, app_dir)),
+            ("app_context", lambda: app_class(self.app_context)),
+            ("no arguments", lambda: app_class()),
         ]
 
-        for constructor in constructors:
+        last_type_error = None
+
+        for constructor_name, constructor in constructors:
             try:
-                return constructor()
-            except TypeError:
+                instance = constructor()
+                print_and_log(
+                    message=f"Created app instance for '{app_id}' using constructor: {constructor_name}",
+                    app_id=app_id,
+                    source="AppLoader",
+                )
+                return instance
+            except TypeError as e:
+                last_type_error = e
                 continue
-            except Exception:
+            except Exception as e:
+                print_and_log(
+                    message=f"Failed creating app instance for '{app_id}' using constructor: {constructor_name}",
+                    exc=e,
+                    app_id=app_id,
+                    source="AppLoader",
+                )
                 return None
 
+        print_and_log(
+            message=f"Failed creating app instance for '{app_id}': no constructor matched",
+            exc=last_type_error,
+            app_id=app_id,
+            source="AppLoader",
+        )
         return None
 
     def safe_app_call(self, app_data, action_name, func, default=None):

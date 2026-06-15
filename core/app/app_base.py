@@ -1,5 +1,6 @@
 from pathlib import Path
 import shutil
+import json
 from core import paths
 
 
@@ -24,6 +25,8 @@ class AppBase:
         self._runtime_service = None
         self._runtime_instance_id = None
         self._main_window = None
+        
+        self.on_init()
 
     def on_init(self):
         pass
@@ -252,6 +255,37 @@ class AppBase:
     def get_data_dir(self):
         return paths.get_app_data_dir(self.id)
 
+    def get_cache_file(self, filename: str) -> Path:
+        return self.get_cache_dir() / filename
+
+    def read_json_cache(self, filename: str, default=None):
+        f = self.get_cache_file(filename)
+        try:
+            if not f.exists():
+                return default
+            return json.loads(f.read_text(encoding="utf-8"))
+        except Exception:
+            return default
+
+    def write_json_cache(self, filename: str, data) -> bool:
+        f = self.get_cache_file(filename)
+        try:
+            f.parent.mkdir(parents=True, exist_ok=True)
+            f.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+            return True
+        except Exception:
+            return False
+
+    def delete_cache_file(self, filename: str) -> bool:
+        f = self.get_cache_file(filename)
+        try:
+            if f.exists():
+                f.unlink()
+                return True
+        except Exception:
+            pass
+        return False
+
     def get_user_value(self, key, default=None):
         manager = self.get_config_manager()
         if manager is None:
@@ -314,3 +348,26 @@ class AppBase:
         if isinstance(self.context, dict):
             return self.context.get(key, default)
         return getattr(self.context, key, default)
+
+    def get_app_context(self) -> dict:
+        """Return a dict-like app context for convenience in UI classes.
+
+        Prefers `app_context` or `context` keys when `self.context` is a dict,
+        otherwise looks for attributes on the context object. Always returns
+        a dict (empty if nothing available).
+        """
+        if isinstance(self.context, dict):
+            return self.context.get("app_context") or self.context.get("context") or self.context or {}
+
+        value = getattr(self.context, "app_context", None)
+        if isinstance(value, dict):
+            return value
+
+        value = getattr(self.context, "context", None)
+        if isinstance(value, dict):
+            return value
+
+        if isinstance(self.context, dict):
+            return self.context
+
+        return {}

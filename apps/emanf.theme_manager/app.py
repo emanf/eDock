@@ -111,19 +111,23 @@ class ThemeJsonEditor:
 class ThemeManagerApp(AppBase):
     def on_init(self):
         self.window = None
-
-    def run(self):
-        if self.window is not None:
-            self.window.show()
-            self.window.raise_()
-            self.window.activateWindow()
-            return
+        
+    def on_load(self):
         self.window = ThemeManagerWindow(self)
-        self.window.destroyed.connect(self._clear_window)
-        self.window.show()
 
-    def _clear_window(self, *args):
+    def on_unload(self):
+        if self.window is not None:
+            self.window.hide()
+            
         self.window = None
+        
+    def run(self):
+        if self.window is None:
+            return
+        
+        self.window.show()
+        self.window.raise_()
+        self.window.activateWindow()
 
 
 

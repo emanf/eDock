@@ -87,14 +87,6 @@ class AppRuntimeService:
         if not allow_multi:
             self.primary_instance_by_app[aid] = instance_id
 
-        if hasattr(inst, "on_init"):
-            self._safe_call(
-                inst,
-                "on_init",
-                lambda: inst.on_init(),
-                default=None,
-            )
-
         if hasattr(inst, "on_load"):
             self._safe_call(
                 inst,

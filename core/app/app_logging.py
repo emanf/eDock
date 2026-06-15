@@ -64,6 +64,12 @@ def write_app_log(message, exc=None, app_instance=None, app_data=None, app_id=No
     lines.append("")
 
     try:
+        # ensure log directory exists
+        try:
+            log_path.parent.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            pass
+
         with open(log_path, "a", encoding="utf-8") as f:
             f.write("\n".join(lines))
     except Exception as log_error:
