@@ -1,3 +1,4 @@
+<p align="center"><img src="edock_logo.png" width="300" alt="Logo"></p>
 # eDock
 
 **Build, discover, install, and run Python apps from source code.**
