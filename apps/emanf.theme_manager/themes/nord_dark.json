@@ -1,0 +1,266 @@
+{
+    "meta": {
+        "id": "nord_dark",
+        "name": "Nord Dark",
+        "type": "theme-manager"
+    },
+    "colors": {
+        "background": "#2e3440ee",
+        "panel": "#3b4252ee",
+        "surface": "#434c5edd",
+        "surface_hover": "#4c566add",
+        "surface_pressed": "#5e81acdd",
+        "border": "#81a1c1bb",
+        "text": "#eceff4",
+        "muted_text": "#d8dee9",
+        "placeholder": "#88c0d0",
+        "positive": "#a3be8c",
+        "positive_hover": "#b5d19a",
+        "positive_pressed": "#8daa75",
+        "positive_text": "#2e3440",
+        "positive_border": "#8fbcbb",
+        "negative": "#bf616a",
+        "negative_hover": "#d06f79",
+        "negative_pressed": "#a84f58",
+        "negative_text": "#ffffff",
+        "negative_border": "#d08770",
+        "danger": "#bf616add",
+        "danger_hover": "#d06f79dd",
+        "danger_pressed": "#a84f58dd",
+        "danger_text": "#ffffff",
+        "danger_border": "#d08770cc",
+        "warning": "#ebcb8b",
+        "warning_hover": "#f2d79c",
+        "warning_pressed": "#d9b96d",
+        "warning_text": "#2e3440",
+        "warning_border": "#ebcB8b",
+        "info": "#5e81ac",
+        "info_hover": "#81a1c1",
+        "info_pressed": "#4c6f96",
+        "info_text": "#ffffff",
+        "info_border": "#88c0d0"
+    },
+    "sizes": {
+        "space": {
+            "xs": 4,
+            "sm": 8,
+            "md": 12,
+            "lg": 16,
+            "xl": 20
+        },
+        "radius": {
+            "xs": 8,
+            "sm": 12,
+            "md": 14,
+            "lg": 18,
+            "xl": 28,
+            "2xl": 36
+        },
+        "border_width": {
+            "hairline": 0.5,
+            "thin": 1.0,
+            "medium": 1.2,
+            "thick": 1.5,
+            "heavy": 2.0
+        },
+        "icon": {
+            "xs": 16,
+            "sm": 20,
+            "md": 24,
+            "lg": 32,
+            "xl": 40,
+            "2xl": 48,
+            "3xl": 56,
+            "4xl": 64,
+            "5xl": 72
+        }
+    },
+    "components": {
+        "dock": {
+            "background_color": "#2e3440ee",
+            "border_color": "#81a1c1bb",
+            "border_width": 1.2,
+            "border_radius": 28
+        },
+        "button": {
+            "normal": {
+                "background_color": "#434c5edd",
+                "hover_color": "#4c566add",
+                "pressed_color": "#5e81acdd",
+                "border_color": "#81a1c1bb",
+                "text_color": "#eceff4",
+                "border_width": 1.0,
+                "border_radius": 18
+            },
+            "muted": {
+                "background_color": "#3b4252aa",
+                "hover_color": "#434c5ebb",
+                "pressed_color": "#4c566abb",
+                "border_color": "#81a1c177",
+                "text_color": "#eceff488",
+                "border_width": 1.0,
+                "border_radius": 18
+            },
+            "positive": {
+                "background_color": "#a3be8c",
+                "hover_color": "#b5d19a",
+                "pressed_color": "#8daa75",
+                "border_color": "#8fbcbb",
+                "text_color": "#2e3440",
+                "border_width": 1.0,
+                "border_radius": 18
+            },
+            "negative": {
+                "background_color": "#bf616a",
+                "hover_color": "#d06f79",
+                "pressed_color": "#a84f58",
+                "border_color": "#d08770",
+                "text_color": "#ffffff",
+                "border_width": 1.0,
+                "border_radius": 18
+            },
+            "danger": {
+                "background_color": "#bf616add",
+                "hover_color": "#d06f79dd",
+                "pressed_color": "#a84f58dd",
+                "border_color": "#d08770cc",
+                "text_color": "#ffffff",
+                "border_width": 1.0,
+                "border_radius": 18
+            },
+            "warning": {
+                "background_color": "#ebcb8b",
+                "hover_color": "#f2d79c",
+                "pressed_color": "#d9b96d",
+                "border_color": "#ebcb8b",
+                "text_color": "#2e3440",
+                "border_width": 1.0,
+                "border_radius": 18
+            },
+            "info": {
+                "background_color": "#5e81ac",
+                "hover_color": "#81a1c1",
+                "pressed_color": "#4c6f96",
+                "border_color": "#88c0d0",
+                "text_color": "#ffffff",
+                "border_width": 1.0,
+                "border_radius": 18
+            },
+            "close": {
+                "background_color": "#3b4252ee",
+                "hover_color": "#bf616add",
+                "pressed_color": "#a84f58dd",
+                "border_color": "#3b4252ee",
+                "text_color": "#ffffff",
+                "border_width": 0.0,
+                "border_radius": 12
+            }
+        },
+        "icon": {
+            "normal": {
+                "color": "#eceff4",
+                "size": 56,
+                "padding": 20
+            },
+            "positive": {
+                "color": "#a3be8c",
+                "size": 56,
+                "padding": 20
+            },
+            "negative": {
+                "color": "#bf616a",
+                "size": 56,
+                "padding": 20
+            },
+            "warning": {
+                "color": "#ebcb8b",
+                "size": 56,
+                "padding": 20
+            },
+            "info": {
+                "color": "#88c0d0",
+                "size": 56,
+                "padding": 20
+            },
+            "muted": {
+                "color": "#88c0d0",
+                "size": 56,
+                "padding": 20
+            }
+        },
+        "text": {
+            "normal": {
+                "color": "#eceff4",
+                "font_size": 14,
+                "font_weight": 400
+            },
+            "muted": {
+                "color": "#d8dee9",
+                "font_size": 14,
+                "font_weight": 400
+            },
+            "title": {
+                "color": "#eceff4",
+                "font_size": 18,
+                "font_weight": 600
+            },
+            "subtitle": {
+                "color": "#d8dee9",
+                "font_size": 13,
+                "font_weight": 400
+            },
+            "positive": {
+                "color": "#a3be8c",
+                "font_size": 14,
+                "font_weight": 400
+            },
+            "negative": {
+                "color": "#bf616a",
+                "font_size": 14,
+                "font_weight": 400
+            },
+            "warning": {
+                "color": "#ebcb8b",
+                "font_size": 14,
+                "font_weight": 400
+            },
+            "info": {
+                "color": "#88c0d0",
+                "font_size": 14,
+                "font_weight": 400
+            }
+        },
+        "input": {
+            "background_color": "#434c5edd",
+            "border_color": "#81a1c1bb",
+            "text_color": "#eceff4",
+            "placeholder_color": "#88c0d0",
+            "selection_color": "#5e81ac",
+            "border_width": 1.0,
+            "border_radius": 12
+        },
+        "menu": {
+            "background_color": "#3b4252ee",
+            "border_color": "#81a1c1bb",
+            "text_color": "#eceff4",
+            "hover_color": "#4c566add",
+            "separator_color": "#81a1c1bb",
+            "border_width": 1.0,
+            "border_radius": 14
+        },
+        "dialog": {
+            "background_color": "#2e3440ee",
+            "border_color": "#81a1c1bb",
+            "text_color": "#eceff4",
+            "border_width": 1.0,
+            "border_radius": 18
+        },
+        "tooltip": {
+            "background_color": "#2e3440ee",
+            "border_color": "#81a1c1bb",
+            "text_color": "#eceff4",
+            "border_width": 1.0,
+            "border_radius": 8
+        }
+    }
+}

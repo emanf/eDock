@@ -1,0 +1,11 @@
+{
+    "id": "emanf.theme_manager",
+    "title": "Theme Manager",
+    "description": "Manage, preview, customize, and apply dock themes.",
+    "version": "1.0.0",
+    "last_modified": "2026-06-04",
+    "author": "eManF",
+    "author_email": "emanf.co@gmail.com",
+    "author_website": "https://github.com/emanf",
+    "icon": "m:palette"
+}

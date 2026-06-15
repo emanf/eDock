@@ -1,0 +1,266 @@
+{
+    "meta": {
+        "id": "dracula",
+        "name": "Dracula",
+        "type": "theme-manager"
+    },
+    "colors": {
+        "background": "#282a36ee",
+        "panel": "#21222cee",
+        "surface": "#343746dd",
+        "surface_hover": "#44475add",
+        "surface_pressed": "#4d5066dd",
+        "border": "#6272a4bb",
+        "text": "#f8f8f2",
+        "muted_text": "#bd93f9",
+        "placeholder": "#6272a4",
+        "positive": "#50fa7b",
+        "positive_hover": "#69ff94",
+        "positive_pressed": "#3ae166",
+        "positive_text": "#282a36",
+        "positive_border": "#8be9fd",
+        "negative": "#ff5555",
+        "negative_hover": "#ff6e6e",
+        "negative_pressed": "#e64545",
+        "negative_text": "#ffffff",
+        "negative_border": "#ff92a5",
+        "danger": "#ff5555dd",
+        "danger_hover": "#ff6e6edd",
+        "danger_pressed": "#e64545dd",
+        "danger_text": "#ffffff",
+        "danger_border": "#ff92a5cc",
+        "warning": "#f1fa8c",
+        "warning_hover": "#ffffa5",
+        "warning_pressed": "#d7df72",
+        "warning_text": "#282a36",
+        "warning_border": "#f1fa8c",
+        "info": "#8be9fd",
+        "info_hover": "#a4ffff",
+        "info_pressed": "#6fd6eb",
+        "info_text": "#282a36",
+        "info_border": "#bd93f9"
+    },
+    "sizes": {
+        "space": {
+            "xs": 4,
+            "sm": 8,
+            "md": 12,
+            "lg": 16,
+            "xl": 20
+        },
+        "radius": {
+            "xs": 8,
+            "sm": 12,
+            "md": 14,
+            "lg": 18,
+            "xl": 28,
+            "2xl": 36
+        },
+        "border_width": {
+            "hairline": 0.5,
+            "thin": 1.0,
+            "medium": 1.2,
+            "thick": 1.5,
+            "heavy": 2.0
+        },
+        "icon": {
+            "xs": 16,
+            "sm": 20,
+            "md": 24,
+            "lg": 32,
+            "xl": 40,
+            "2xl": 48,
+            "3xl": 56,
+            "4xl": 64,
+            "5xl": 72
+        }
+    },
+    "components": {
+        "dock": {
+            "background_color": "#282a36ee",
+            "border_color": "#6272a4bb",
+            "border_width": 1.2,
+            "border_radius": 28
+        },
+        "button": {
+            "normal": {
+                "background_color": "#343746dd",
+                "hover_color": "#44475add",
+                "pressed_color": "#4d5066dd",
+                "border_color": "#6272a4bb",
+                "text_color": "#f8f8f2",
+                "border_width": 1.0,
+                "border_radius": 18
+            },
+            "muted": {
+                "background_color": "#21222caa",
+                "hover_color": "#343746bb",
+                "pressed_color": "#44475abb",
+                "border_color": "#6272a477",
+                "text_color": "#f8f8f288",
+                "border_width": 1.0,
+                "border_radius": 18
+            },
+            "positive": {
+                "background_color": "#50fa7b",
+                "hover_color": "#69ff94",
+                "pressed_color": "#3ae166",
+                "border_color": "#8be9fd",
+                "text_color": "#282a36",
+                "border_width": 1.0,
+                "border_radius": 18
+            },
+            "negative": {
+                "background_color": "#ff5555",
+                "hover_color": "#ff6e6e",
+                "pressed_color": "#e64545",
+                "border_color": "#ff92a5",
+                "text_color": "#ffffff",
+                "border_width": 1.0,
+                "border_radius": 18
+            },
+            "danger": {
+                "background_color": "#ff5555dd",
+                "hover_color": "#ff6e6edd",
+                "pressed_color": "#e64545dd",
+                "border_color": "#ff92a5cc",
+                "text_color": "#ffffff",
+                "border_width": 1.0,
+                "border_radius": 18
+            },
+            "warning": {
+                "background_color": "#f1fa8c",
+                "hover_color": "#ffffa5",
+                "pressed_color": "#d7df72",
+                "border_color": "#f1fa8c",
+                "text_color": "#282a36",
+                "border_width": 1.0,
+                "border_radius": 18
+            },
+            "info": {
+                "background_color": "#8be9fd",
+                "hover_color": "#a4ffff",
+                "pressed_color": "#6fd6eb",
+                "border_color": "#bd93f9",
+                "text_color": "#282a36",
+                "border_width": 1.0,
+                "border_radius": 18
+            },
+            "close": {
+                "background_color": "#21222cee",
+                "hover_color": "#ff5555dd",
+                "pressed_color": "#e64545dd",
+                "border_color": "#21222cee",
+                "text_color": "#ffffff",
+                "border_width": 0.0,
+                "border_radius": 12
+            }
+        },
+        "icon": {
+            "normal": {
+                "color": "#f8f8f2",
+                "size": 56,
+                "padding": 20
+            },
+            "positive": {
+                "color": "#50fa7b",
+                "size": 56,
+                "padding": 20
+            },
+            "negative": {
+                "color": "#ff5555",
+                "size": 56,
+                "padding": 20
+            },
+            "warning": {
+                "color": "#f1fa8c",
+                "size": 56,
+                "padding": 20
+            },
+            "info": {
+                "color": "#8be9fd",
+                "size": 56,
+                "padding": 20
+            },
+            "muted": {
+                "color": "#6272a4",
+                "size": 56,
+                "padding": 20
+            }
+        },
+        "text": {
+            "normal": {
+                "color": "#f8f8f2",
+                "font_size": 14,
+                "font_weight": 400
+            },
+            "muted": {
+                "color": "#bd93f9",
+                "font_size": 14,
+                "font_weight": 400
+            },
+            "title": {
+                "color": "#ff79c6",
+                "font_size": 18,
+                "font_weight": 600
+            },
+            "subtitle": {
+                "color": "#bd93f9",
+                "font_size": 13,
+                "font_weight": 400
+            },
+            "positive": {
+                "color": "#50fa7b",
+                "font_size": 14,
+                "font_weight": 400
+            },
+            "negative": {
+                "color": "#ff5555",
+                "font_size": 14,
+                "font_weight": 400
+            },
+            "warning": {
+                "color": "#f1fa8c",
+                "font_size": 14,
+                "font_weight": 400
+            },
+            "info": {
+                "color": "#8be9fd",
+                "font_size": 14,
+                "font_weight": 400
+            }
+        },
+        "input": {
+            "background_color": "#343746dd",
+            "border_color": "#6272a4bb",
+            "text_color": "#f8f8f2",
+            "placeholder_color": "#6272a4",
+            "selection_color": "#8be9fd",
+            "border_width": 1.0,
+            "border_radius": 12
+        },
+        "menu": {
+            "background_color": "#21222cee",
+            "border_color": "#6272a4bb",
+            "text_color": "#f8f8f2",
+            "hover_color": "#44475add",
+            "separator_color": "#6272a4bb",
+            "border_width": 1.0,
+            "border_radius": 14
+        },
+        "dialog": {
+            "background_color": "#282a36ee",
+            "border_color": "#6272a4bb",
+            "text_color": "#f8f8f2",
+            "border_width": 1.0,
+            "border_radius": 18
+        },
+        "tooltip": {
+            "background_color": "#282a36ee",
+            "border_color": "#6272a4bb",
+            "text_color": "#f8f8f2",
+            "border_width": 1.0,
+            "border_radius": 8
+        }
+    }
+}

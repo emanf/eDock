@@ -1,0 +1,18 @@
+{
+	"theme": "dark",
+	"dock": {
+		"position": "right"
+	},
+	"apps": {
+		"emanf.spotlight": {
+			"enabled": true,
+			"sort": 0,
+			"shortcut": ""
+		},
+		"emanf.theme_manager": {
+			"enabled": true,
+			"sort": 1,
+			"shortcut": ""
+		}
+	}
+}
