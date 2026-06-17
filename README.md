@@ -54,19 +54,26 @@ Download Python:
 ```bash
 https://www.python.org/downloads/
 ```
+
 Clone the repository:
 ```bash
 git clone https://github.com/emanf/edock.git
+```
+```bash
 cd edock
 ```
-Install dependencies:
 
+Install pip:
+```bash
+python -m ensurepip --upgrade
+```
+
+Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
 Run eDock:
-
 ```bash
 python main.py
 ```
