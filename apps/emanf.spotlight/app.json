@@ -1,11 +1,11 @@
 {
-    "id": "emanf.spotlight",
-    "title": "Spotlight",
-    "description": "A fast desktop search popup inspired by macOS Spotlight.",
-    "version": "1.0.0",
-    "last_modified": "2026-06-01",
-    "author": "eManF",
-    "author_email": "emanf.co@gmail.com",
-    "author_website": "https://github.com/emanf",
-    "icon": "m:search"
+  "id": "emanf.spotlight",
+  "title": "Spotlight",
+  "description": "A fast desktop search popup inspired by macOS Spotlight.",
+  "version": "1.0.0",
+  "last_modified": "2026-06-01",
+  "author": "eManF",
+  "author_email": "emanf.co@gmail.com",
+  "author_website": "https://github.com/emanf",
+  "icon": "m:search"
 }

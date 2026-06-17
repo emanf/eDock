@@ -1,5 +1,6 @@
 import sys
 from core.paths import setup_pycache_dir
+
 setup_pycache_dir()
 
 from PySide6.QtWidgets import QApplication
@@ -7,6 +8,7 @@ from core.config.config_manager import ConfigManager
 from core.app.app_loader import AppLoader
 from core.app.app_context import AppContext
 from core.ui.dock.dock_window import DockWindow
+
 
 def main():
     app = QApplication(sys.argv)

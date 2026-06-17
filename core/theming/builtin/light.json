@@ -46,41 +46,41 @@
     "info_text": "#ffffff",
     "info_border": "#60a5fa"
   },
-  	"sizes": {
-	  "space": {
-		"xs": 4,
-		"sm": 8,
-		"md": 12,
-		"lg": 16,
-		"xl": 20
-	  },
-	  "radius": {
-		"xs": 8,
-		"sm": 12,
-		"md": 14,
-		"lg": 18,
-		"xl": 28,
-		"2xl": 36
-	  },
-	  "border_width": {
-		"hairline": 0.5,
-		"thin": 1.0,
-		"medium": 1.2,
-		"thick": 1.5,
-		"heavy": 2.0
-	  },
-	  "icon": {
-		"xs": 16,
-		"sm": 20,
-		"md": 24,
-		"lg": 32,
-		"xl": 40,
-		"2xl": 48,
-		"3xl": 56,
-		"4xl": 64,
-		"5xl": 72
-	  }
-	},
+  "sizes": {
+    "space": {
+      "xs": 4,
+      "sm": 8,
+      "md": 12,
+      "lg": 16,
+      "xl": 20
+    },
+    "radius": {
+      "xs": 8,
+      "sm": 12,
+      "md": 14,
+      "lg": 18,
+      "xl": 28,
+      "2xl": 36
+    },
+    "border_width": {
+      "hairline": 0.5,
+      "thin": 1.0,
+      "medium": 1.2,
+      "thick": 1.5,
+      "heavy": 2.0
+    },
+    "icon": {
+      "xs": 16,
+      "sm": 20,
+      "md": 24,
+      "lg": 32,
+      "xl": 40,
+      "2xl": 48,
+      "3xl": 56,
+      "4xl": 64,
+      "5xl": 72
+    }
+  },
   "components": {
     "dock": {
       "background_color": "#f2f2f2ee",
