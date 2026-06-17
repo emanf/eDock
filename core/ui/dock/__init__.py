@@ -1,2 +1,1 @@
-# core.ui.dock package
-__all__ = []
+__all__ =[]

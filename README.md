@@ -10,8 +10,6 @@ Every eDock app is open, editable, and easy to improve.
 
 ---
 
-## What Is eDock?
-
 eDock is a simple app platform for Python automation tools.
 
 With eDock, developers can create:
@@ -33,8 +31,6 @@ Users can:
 
 ---
 
-## Why eDock?
-
 Most apps hide their code.
 
 eDock is different.
@@ -42,8 +38,6 @@ eDock is different.
 Every app comes with source code and only runs from source code. This makes apps transparent, customizable, and useful for developers and users.
 
 ---
-
-## Features
 
 - Free and source-available
 - Simple workflow for developers
@@ -55,8 +49,6 @@ Every app comes with source code and only runs from source code. This makes apps
 - Built with Python and PySide6
 
 ---
-
-## Installation
 
 Download Python:
 ```bash
@@ -81,14 +73,10 @@ python main.py
 
 ---
 
-## Built With
-
 - Python
 - PySide6 / Qt for Python
 
 ---
-
-## Contributing
 
 Contributions are welcome.
 
@@ -104,8 +92,6 @@ You can help by:
 Fork the repository, make your changes, and open a pull request.
 
 ---
-
-## About
 
 eDock is a source-code-first platform for Python apps.
 

@@ -1,0 +1,28 @@
+# Python caches
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Virtualenvs and common build artifacts
+venv/
+.venv/
+dist/
+build/
+*.egg-info/
+
+# User data and backups
+user/
+backups/
+
+# Editor/workspace files
+.vscode/
+.idea/
+
+# Ignore names starting with three underscores (files or dirs)
+**/___*/
+**/___*
+
+# Ignore Git directories and files
+**/.git/
+**/.git
