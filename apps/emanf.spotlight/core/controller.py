@@ -367,8 +367,7 @@ class Controller:
                         if app_data is not None:
                             if runtime is not None:
                                 try:
-                                    inst = runtime.launch(app_data)
-
+                                    runtime.launch(app_data)
                                     return
                                 except Exception:
                                     pass
@@ -387,12 +386,7 @@ class Controller:
 
             if runtime is not None:
                 try:
-                    inst = runtime.launch(result_dict)
-                    try:
-                        pass
-                    except Exception:
-                        pass
-                    return
+                    runtime.launch(result_dict)
                 except Exception:
                     pass
 
