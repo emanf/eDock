@@ -49,6 +49,7 @@ Every app comes with source code and only runs from source code. This makes apps
 - Built with Python and PySide6
 
 ---
+# Usage
 
 Download Python:
 ```bash
