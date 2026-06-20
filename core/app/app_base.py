@@ -1,6 +1,7 @@
-from pathlib import Path
 import shutil
 import json
+from pathlib import Path
+
 from core import paths
 
 
@@ -9,6 +10,7 @@ class AppBase:
         self.context = context
         self.manifest = manifest or {}
         self.app_dir = Path(app_dir)
+        self.schema = self.manifest.get("schema", 1)
         self.id = self.manifest.get("id", self.app_dir.name)
         self.title = self.manifest.get("title", self.app_dir.name)
         self.description = self.manifest.get("description", "")
@@ -18,9 +20,18 @@ class AppBase:
         self.author_email = self.manifest.get("author_email", "")
         self.author_website = self.manifest.get("author_website", "")
         self.icon = self.manifest.get("icon", "")
+        self.homepage = self.manifest.get("homepage", "")
+        self.repository = self.manifest.get("repository", "")
+        self.category = self.manifest.get("category", "")
+        self.keywords = self.manifest.get("keywords", [])
+        self.download = self.manifest.get("download", "")
+        self.manifest_url = self.manifest.get("manifest", "")
+        self.changelog = self.manifest.get("changelog", "")
+        self.min_edock_version = self.manifest.get("min_edock_version", "")
+        self.license = self.manifest.get("license", "")
+
         self.shortcut_value = self.get_user_value("shortcut", "")
         self.enabled = self.get_user_value("enabled", True)
-        self.pinned = self.get_user_value("pinned", True)
 
         self._runtime_service = None
         self._runtime_instance_id = None
@@ -180,6 +191,8 @@ class AppBase:
 
     def show_info(self):
         return {
+            "app_dir": str(self.app_dir),
+            "schema": self.schema,
             "id": self.id,
             "title": self.title,
             "description": self.description,
@@ -189,7 +202,15 @@ class AppBase:
             "author_email": self.author_email,
             "author_website": self.author_website,
             "icon": self.icon,
-            "app_dir": str(self.app_dir),
+            "homepage": self.homepage,
+            "repository": self.repository,
+            "category": self.category,
+            "keywords": self.keywords,
+            "download": self.download,
+            "manifest": self.manifest_url,
+            "changelog": self.changelog,
+            "min_edock_version": self.min_edock_version,
+            "license": self.license,
         }
 
     def request_shortcut(self):
@@ -329,9 +350,31 @@ class AppBase:
         return self.asset_path(filename).exists()
 
     def get_icon_path(self):
-        svg_path = self.app_dir / "app.svg"
-        if svg_path.exists():
-            return str(svg_path)
+        candidates = [
+            self.app_dir / "app.svg",
+            self.app_dir / "app.png",
+            self.app_dir / "app.jpg",
+            self.app_dir / "icon.svg",
+            self.app_dir / "icon.png",
+            self.app_dir / "icon.jpg",
+        ]
+
+        for p in candidates:
+            try:
+                if p.exists():
+                    return str(p)
+            except Exception:
+                pass
+
+        try:
+            icon_val = str(self.icon or "").strip()
+            if icon_val:
+                icon_path = self.app_dir / icon_val
+                if icon_path.exists():
+                    return str(icon_path)
+        except Exception:
+            pass
+
         return self.icon
 
     def manifest_value(self, key, default=None):

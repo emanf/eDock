@@ -1,11 +1,21 @@
 {
+  "schema": 1,
   "id": "emanf.spotlight",
   "title": "Spotlight",
   "description": "A fast desktop search popup inspired by macOS Spotlight.",
   "version": "0.2.0",
   "last_modified": "2026-06-17",
   "author": "eManF",
-  "author_email": "emanf.co@gmail.com",
-  "author_website": "https://github.com/emanf",
-  "icon": "m:search"
+  "author_email": "eManF.co@gmail.com",
+  "author_website": "https://github.com/eManF",
+  "icon": "m:search",
+  "homepage": "https://github.com/eManF/eDock-Spotlight",
+  "repository": "https://github.com/emanF/eDock-Spotlight",
+  "category": "utility",
+  "keywords": ["search", "launcher", "installer", "spotlight"],
+  "download": "https://github.com/eManF/eDock-Spotlight/releases/latest/download/app.zip",
+  "manifest": "https://raw.githubusercontent.com/eManF/eDock-Spotlight/main/app.json",
+  "changelog": "https://github.com/eManF/eDock-Spotlight/releases/changelog.md",
+  "min_edock_version": "0.1.0",
+  "license": ""
 }
