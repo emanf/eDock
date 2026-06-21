@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="edock_logo.jpg" width="150" alt="eDock Logo">
+  <img src="edock_logo.jpg" width="300" alt="eDock Logo">
 </p>
 
-<img src="edock.gif" align="right" width="420">
+<img src="edock.gif" align="right" width="250">
 
 # eDock
 
