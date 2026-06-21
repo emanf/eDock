@@ -5,25 +5,9 @@
 
 # eDock
 
-**A desktop dock for running open‑source Python apps directly from source code.**
-
-Build apps. Drop them into the dock. Launch, inspect, and improve them.
-
----
-
-## What is eDock?
-
 eDock is a Python desktop dock that sits on the edge of your screen and gives you quick access to small apps and tools.
 
 Each icon in the dock is a real Python app.
-
-These apps are not packaged into closed binaries. They run directly from their source code, which means users and developers can:
-
-- launch apps instantly from the dock
-- inspect how each app works
-- edit the source code
-- improve or customize apps
-- build and share their own apps
 
 eDock is designed for an open app ecosystem where every app stays accessible, readable, and extensible.
 
@@ -57,7 +41,7 @@ Instead of hiding app logic behind compiled packages, eDock keeps apps in plain 
 - simple app-based structure
 - easy to extend with your own apps
 - source-available project
-- built with Python and PySide6
+- built with Python
 
 ---
 # Usage
@@ -107,5 +91,3 @@ You can help by:
 - Improving the UI
 - Creating eDock apps
 - Improving documentation
-
-Fork the repository, make your changes, and open a pull request.
