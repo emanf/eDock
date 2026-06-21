@@ -14,7 +14,7 @@ eDock is designed for an open app ecosystem where every app stays accessible, re
 ---
 # Usage
 
-Download Python:
+Install Python:
 ```text
 https://www.python.org/downloads/
 ```
