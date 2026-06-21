@@ -15,8 +15,13 @@ eDock is designed for an open app ecosystem where every app stays accessible, re
 # Usage
 
 Download Python:
-```bash
+```text
 https://www.python.org/downloads/
+```
+
+Install Git:
+```text
+https://github.com/git-guides/install-git
 ```
 
 Clone the repository:
