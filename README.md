@@ -14,17 +14,19 @@ eDock is designed for an open app ecosystem where every app stays accessible, re
 ---
 # Usage
 
-Install Python:
+## 1. Install Python:
 ```text
 https://www.python.org/downloads/
 ```
 
-Install Git:
+## 2. Install Git:
 ```text
 https://github.com/git-guides/install-git
 ```
 
-Clone the repository:
+(all below commands should run in *cmd* or *terminal*)
+## 3. Clone the repository:
+Run the following commands in *Command Prompt (Windows)* or *Terminal (macOS/Linux)*:
 ```bash
 git clone https://github.com/emanf/edock.git
 ```
@@ -32,17 +34,17 @@ git clone https://github.com/emanf/edock.git
 cd edock
 ```
 
-Install pip:
+## 4. Install pip:
 ```bash
 python -m ensurepip --upgrade
 ```
 
-Install dependencies:
+## 5. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-Run eDock:
+## 6. Run eDock:
 ```bash
 python main.py
 ```
