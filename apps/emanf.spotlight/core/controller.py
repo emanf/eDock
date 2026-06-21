@@ -437,6 +437,15 @@ class Controller:
         kind = str(result.kind or "").lower().strip()
 
         if mode == QUERY_MODE_APPS:
+            try:
+                if self._is_app_enabled(result.id):
+                    decorated["_spotlight_status"] = "enabled"
+                    decorated["_spotlight_actionable"] = True
+                    decorated["_spotlight_action"] = "showcase"
+                    return decorated
+            except Exception:
+                pass
+
             if kind == KIND_LOCAL:
                 decorated["_spotlight_status"] = "enabled"
                 decorated["_spotlight_actionable"] = True

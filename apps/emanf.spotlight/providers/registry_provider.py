@@ -16,15 +16,67 @@ class RegistryProvider(BaseProvider):
         self.installed_app_ids = installed_app_ids or set()
 
     def search(self, query: str, worker=None) -> List[SearchResult]:
-        query = str(query or "").strip()
+        query = " ".join(str(query or "").split()).strip()
         if not query:
             return []
+
+        left, sep, right = query.partition(" ")
+        if "." in left:
+            packages = self.registry_service.get_packages()
+            if not packages:
+                return []
+
+            q_left = self._normalize(left)
+            candidates = []
+            for package_dict in packages:
+                try:
+                    normalized = self._normalize_package(package_dict)
+                    if not normalized:
+                        continue
+                    app_id = self._normalize(normalized.get("id") or "")
+                    if not app_id:
+                        continue
+                    if app_id == q_left:
+                        candidates.append(normalized)
+                        continue
+                    app_parts = [p for p in app_id.split('.') if p]
+                    left_parts = [p for p in q_left.split('.') if p]
+                    ok = True
+                    for i, part in enumerate(left_parts):
+                        if i >= len(app_parts) or not app_parts[i].startswith(part):
+                            ok = False
+                            break
+                    if ok:
+                        candidates.append(normalized)
+                except Exception:
+                    continue
+
+            if candidates:
+                if not right:
+                    results = [self._package_to_result(c) for c in candidates]
+                    return results[:REGISTRY_RESULTS_LIMIT]
+
+                scored = []
+                for pkg in candidates:
+                    try:
+                        sc = self._score_package(right, pkg)
+                        if sc > 0:
+                            scored.append((sc, pkg))
+                    except Exception:
+                        continue
+
+                scored.sort(key=lambda x: (-x[0], self._normalize(x[1].get('title') or '')))
+                return [self._package_to_result(pkg) for _, pkg in scored[:REGISTRY_RESULTS_LIMIT]]
+
 
         packages = self.registry_service.get_packages()
         if not packages:
             return []
 
         results = []
+        q_norm = self._normalize(query)
+        words = [w for w in q_norm.split() if w]
+
         for package_dict in packages:
             if worker and worker.is_cancelled():
                 return []
@@ -33,10 +85,30 @@ class RegistryProvider(BaseProvider):
                 if not normalized:
                     continue
 
-                score = self._score_package(query, normalized)
-                if score <= 0:
-                    continue
+                app_id = self._normalize(normalized.get("id") or "")
+                title = self._normalize(normalized.get("title") or "")
+                desc = self._normalize(normalized.get("description") or normalized.get("subtitle") or "")
+                tags_value = normalized.get("tags") or normalized.get("keywords") or []
+                if isinstance(tags_value, str):
+                    tags = [self._normalize(tags_value)]
+                else:
+                    tags = [self._normalize(str(t)) for t in tags_value]
 
+                if words:
+                    ok = True
+                    for w in words:
+                        if not (
+                            (w in app_id)
+                            or (w in title)
+                            or (w in desc)
+                            or any(w in t for t in tags)
+                        ):
+                            ok = False
+                            break
+                    if not ok:
+                        continue
+
+                score = self._score_package(query, normalized)
                 result = self._package_to_result(normalized)
                 results.append((score, result))
             except Exception as e:
@@ -45,6 +117,39 @@ class RegistryProvider(BaseProvider):
                 )
 
         results.sort(key=lambda x: (-x[0], self._normalize(x[1].title)))
+
+        q = q_norm
+        qualified = any((not ch.isalnum() and ch != " ") for ch in q)
+        if qualified and q:
+            exact = []
+            q_parts = [p for p in q.split('.') if p]
+            for _, res in results:
+                try:
+                    rid = self._normalize(res.id or "")
+                    if not rid:
+                        continue
+
+                    if rid == q:
+                        exact.append(res)
+                        continue
+
+                    if '.' in q and q_parts:
+                        rid_parts = [p for p in rid.split('.') if p]
+                        ok = True
+                        for i, part in enumerate(q_parts):
+                            if i >= len(rid_parts):
+                                ok = False
+                                break
+                            if not rid_parts[i].startswith(part):
+                                ok = False
+                                break
+                        if ok:
+                            exact.append(res)
+                except Exception:
+                    continue
+
+            if exact:
+                return exact[:REGISTRY_RESULTS_LIMIT]
 
         return [result for _, result in results[:REGISTRY_RESULTS_LIMIT]]
 
@@ -177,6 +282,8 @@ class RegistryProvider(BaseProvider):
         ).strip()
         if not searchable:
             return 0
+        words_query = [w for w in query.split() if w]
+        matched_words = 0
 
         if query == title or query == app_id:
             return 1000
@@ -211,11 +318,27 @@ class RegistryProvider(BaseProvider):
         if fuzzy_score >= 230:
             score = max(score, fuzzy_score)
 
-        words = searchable.split()
-        for word in words:
-            if word.startswith(query):
-                score = max(score, 420)
-                break
+        # per-word checks
+        for w in words_query:
+            if not w:
+                continue
+            if w == title or w == app_id:
+                matched_words += 1
+            elif w in title:
+                matched_words += 1
+            elif w in app_id:
+                matched_words += 1
+            elif any(t.startswith(w) for t in tags):
+                matched_words += 1
+            elif any(w in t for t in tags):
+                matched_words += 1
+            elif w in subtitle or w in description or w in author:
+                matched_words += 1
+
+        try:
+            score = int(score + max(0, matched_words - 1) * 50) if matched_words > 0 else int(score)
+        except Exception:
+            pass
 
         return score
 

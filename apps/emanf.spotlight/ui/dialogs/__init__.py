@@ -1,3 +1,3 @@
-from .app_info_dialog import AppInfoDialog, ManifestFetchWorker
+from .app_info_dialog import AppInfoDialog
 
-__all__ = ["AppInfoDialog", "ManifestFetchWorker"]
+__all__ = ["AppInfoDialog"]

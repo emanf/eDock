@@ -34,6 +34,8 @@ class LocalAppsProvider(BaseProvider):
 
     def search(self, query: str, worker=None) -> List[SearchResult]:
 
+        query = " ".join(str(query or "").split()).strip()
+
         if not query:
             try:
                 return [
@@ -44,8 +46,67 @@ class LocalAppsProvider(BaseProvider):
                 ]
             except Exception:
                 return []
+        left, sep, right = query.partition(" ")
+        if "." in left:
+            try:
+                all_items = self._search_local_apps("", worker)
+            except Exception:
+                all_items = []
 
-        query = str(query or "").strip().lower()
+            q_left = self._normalize(left)
+            candidates = {}
+            for item, _ in all_items:
+                try:
+                    app_id = self._normalize(item.get("app_id") or item.get("id") or "")
+                    if not app_id:
+                        continue
+                    if app_id == q_left:
+                        candidates[app_id] = item
+                        continue
+                    app_parts = [p for p in app_id.split('.') if p]
+                    left_parts = [p for p in q_left.split('.') if p]
+                    ok = True
+                    for i, part in enumerate(left_parts):
+                        if i >= len(app_parts) or not app_parts[i].startswith(part):
+                            ok = False
+                            break
+                    if ok:
+                        candidates[app_id] = item
+                except Exception:
+                    continue
+
+            if candidates:
+                if not right:
+                    result_objects = []
+                    for app_id, item in candidates.items():
+                        if worker and worker.is_cancelled():
+                            return []
+                        result_objects.append(self._dict_to_search_result(item))
+                    return result_objects
+
+                try:
+                    rest_items = self._search_local_apps(right, worker)
+                except Exception:
+                    rest_items = []
+
+                filtered = []
+                for item, score in rest_items:
+                    try:
+                        aid = self._normalize(item.get("app_id") or item.get("id") or "")
+                        if aid in candidates:
+                            filtered.append((score, item))
+                    except Exception:
+                        continue
+
+                filtered.sort(key=lambda x: (-x[0], self._normalize(x[1]["title"])))
+                result_objects = []
+                for _, item in filtered[:LOCAL_SEARCH_MAX_RESULTS]:
+                    if worker and worker.is_cancelled():
+                        return []
+                    result_objects.append(self._dict_to_search_result(item))
+                return result_objects
+
+        query = self._normalize(query)
         results = {}
 
         sources = [
@@ -76,6 +137,44 @@ class LocalAppsProvider(BaseProvider):
 
         scored = [(score, item) for item, score in results.values()]
         scored.sort(key=lambda x: (-x[0], self._normalize(x[1]["title"])))
+
+        q = query
+        qualified = any((not ch.isalnum() and ch != " ") for ch in q)
+        if qualified and q:
+            exact_matches = []
+            q_parts = [p for p in q.split('.') if p]
+            for _, item in scored:
+                try:
+                    app_id = self._normalize(item.get("app_id") or item.get("id") or "")
+                    if not app_id:
+                        continue
+
+                    if app_id == q:
+                        exact_matches.append(item)
+                        continue
+
+                    if '.' in q and q_parts:
+                        app_parts = [p for p in app_id.split('.') if p]
+                        ok = True
+                        for i, part in enumerate(q_parts):
+                            if i >= len(app_parts):
+                                ok = False
+                                break
+                            if not app_parts[i].startswith(part):
+                                ok = False
+                                break
+                        if ok:
+                            exact_matches.append(item)
+                except Exception:
+                    continue
+
+            if exact_matches:
+                result_objects = []
+                for item in exact_matches:
+                    if worker and worker.is_cancelled():
+                        return []
+                    result_objects.append(self._dict_to_search_result(item))
+                return result_objects
 
         result_objects = []
         for _, item in scored[:LOCAL_SEARCH_MAX_RESULTS]:
@@ -117,17 +216,56 @@ class LocalAppsProvider(BaseProvider):
 
                 title = str(app_data.get("title", app_id)).strip()
 
-                score = self._score_item(query, title, app_id) if query else 100
+                try:
+                    description = str(app_data.get("description", "") or "").strip()
+                except Exception:
+                    description = ""
+
+                tags_value = app_data.get("keywords") or app_data.get("tags") or []
+                tags = []
+                try:
+                    if isinstance(tags_value, str):
+                        tags = [t.strip() for t in tags_value.split(",") if t.strip()]
+                    elif isinstance(tags_value, (list, tuple, set)):
+                        tags = [str(t).strip() for t in tags_value if str(t).strip()]
+                except Exception:
+                    tags = []
+
+                app_id_norm = self._normalize(app_id)
+                title_norm = self._normalize(title)
+                desc_norm = self._normalize(description)
+                tags_norm = [self._normalize(t) for t in tags]
+
+                q_norm = self._normalize(query)
+                words = [w for w in q_norm.split() if w]
+
+                if words:
+                    ok = True
+                    for w in words:
+                        if not (
+                            (w in app_id_norm)
+                            or (w in title_norm)
+                            or (w in desc_norm)
+                            or any(w in t for t in tags_norm)
+                        ):
+                            ok = False
+                            break
+                    if not ok:
+                        continue
+
+                score = self._score_item(q_norm, title, app_id) if q_norm else 100
 
                 item = {
                     "id": app_id,
                     "title": title,
                     "kind": KIND_LOCAL,
-                    "subtitle": str(app_data.get("description", "")).strip() or None,
+                    "subtitle": description or None,
                     "icon": str(app_data.get("icon", "m:apps")).strip() or "m:apps",
                     "app_id": app_id,
                     "version": app_data.get("version"),
                     "author": app_data.get("author"),
+                    "description": description,
+                    "keywords": tags,
                 }
 
                 results.append((item, score))

@@ -1,7 +1,8 @@
 import json
-import urllib.request
+from pathlib import Path
 
-from PySide6.QtCore import Qt, QTimer, QThread, QObject, Signal, Slot
+from PySide6.QtCore import Qt, QTimer, QUrl
+from PySide6.QtNetwork import QNetworkAccessManager, QNetworkRequest
 from PySide6.QtWidgets import (
     QDialog,
     QVBoxLayout,
@@ -9,7 +10,6 @@ from PySide6.QtWidgets import (
     QLabel,
     QTextEdit,
     QPushButton,
-    QProgressBar,
     QFrame,
     QWidget,
     QGridLayout,
@@ -21,46 +21,12 @@ from core.rendering.material_icons import MaterialIcons
 from PySide6.QtGui import QFont
 
 
-class ManifestFetchWorker(QObject):
-    finished = Signal(dict)
-    failed = Signal(str)
-
-    def __init__(self, manifest_url: str, parent=None):
-        super().__init__(parent)
-        self.manifest_url = str(manifest_url or "").strip()
-
-    @Slot()
-    def run(self):
-        if not self.manifest_url:
-            self.finished.emit({})
-            return
-
-        try:
-            request = urllib.request.Request(
-                self.manifest_url,
-                headers={
-                    "User-Agent": "eDock-Spotlight/1.0",
-                    "Accept": "application/json",
-                },
-            )
-
-            with urllib.request.urlopen(request, timeout=10) as response:
-                data = json.loads(response.read().decode("utf-8"))
-
-            self.finished.emit(data if isinstance(data, dict) else {})
-        except Exception as error:
-            self.failed.emit(str(error))
-            self.finished.emit({})
-
-
 class AppInfoDialog(QDialog):
     def __init__(self, app_data: dict, parent=None):
         super().__init__(parent)
 
         self.app_data = dict(app_data or {})
         self.manifest_data = {}
-        self.fetch_thread = None
-        self.fetch_worker = None
 
         MaterialIcons.ensure_font()
 
@@ -77,9 +43,14 @@ class AppInfoDialog(QDialog):
         self._dragging = False
         self._apply_style()
 
+        try:
+            self._update_action_button(self._get_merged_data())
+        except Exception:
+            pass
+        self._saved_description = None
+
         manifest_url = self._get_manifest_url()
         if manifest_url:
-            self.set_loading(True)
             QTimer.singleShot(0, self._start_fetch)
 
     def _build_ui(self):
@@ -149,12 +120,6 @@ class AppInfoDialog(QDialog):
         divider.setFixedHeight(1)
         layout.addWidget(divider)
 
-        self.progress = QProgressBar(self)
-        self.progress.setRange(0, 0)
-        self.progress.setTextVisible(False)
-        self.progress.setVisible(False)
-        layout.addWidget(self.progress)
-
         self.info_widget = QWidget(self)
         self.info_grid = QGridLayout(self.info_widget)
         self.info_grid.setContentsMargins(0, 0, 0, 0)
@@ -178,20 +143,24 @@ class AppInfoDialog(QDialog):
         layout.addWidget(self.info_widget)
 
         self._populate_info_grid(self._get_merged_data())
+        try:
+            self._update_action_button(self._get_merged_data())
+        except Exception:
+            pass
 
         layout.addStretch(1)
-
         buttons_layout = QHBoxLayout()
         buttons_layout.setSpacing(10)
+
         buttons_layout.addStretch(1)
 
         self.close_info_button = QPushButton("Close", self)
+        self.close_info_button.setObjectName("actionButton")
         self.close_info_button.clicked.connect(self.reject)
-        self.close_info_button.setObjectName("closeInfoButton")
 
         self.action_button = QPushButton("Install", self)
         self.action_button.setObjectName("actionButton")
-        self.action_button.clicked.connect(self.accept)
+        self.action_button.clicked.connect(self._on_action_clicked)
 
         try:
             self.action_button.setEnabled(True)
@@ -236,6 +205,7 @@ class AppInfoDialog(QDialog):
     def _apply_style(self):
 
         uic = Theme.to_ui_color
+        normal_button = Theme.get_button(Theme.BUTTON_NORMAL)
         close_button = Theme.get_button(Theme.BUTTON_CLOSE)
         icon_theme = Theme.get_icon(Theme.ICON_NORMAL)
         title_text = Theme.get_text(Theme.TEXT_TITLE)
@@ -245,27 +215,46 @@ class AppInfoDialog(QDialog):
         input_theme = Theme.get_input()
         colors = Theme.get_colors()
 
-        container_background = uic(dialog_theme.get("background_color"))
-        container_border = uic(dialog_theme.get("border_color"))
-        container_border_width = dialog_theme.get("border_width")
-        container_border_radius = dialog_theme.get("border_radius")
+        container_background = uic(
+            dialog_theme.get(Theme.Components.Dialog.BACKGROUND_COLOR)
+        )
+        container_border = uic(dialog_theme.get(Theme.Components.Dialog.BORDER_COLOR))
+        container_border_width = dialog_theme.get(Theme.Components.Dialog.BORDER_WIDTH)
+        container_border_radius = dialog_theme.get(
+            Theme.Components.Dialog.BORDER_RADIUS
+        )
         icon_background = uic(colors.get(Theme.Colors.PANEL))
-        icon_border = uic(input_theme.get("border_color"))
-        icon_border_width = input_theme.get("border_width")
-        icon_border_radius = input_theme.get("border_radius")
-        icon_color = uic(icon_theme.get("color"))
-        title_color = uic(title_text.get("color"))
-        description_color = uic(muted_text.get("color"))
-        divider_color = uic(dialog_theme.get("border_color"))
-        field_label_color = uic(muted_text.get("color"))
-        field_value_color = uic(normal_text.get("color"))
-        close_background = uic(close_button.get("background_color"))
-        close_hover = uic(close_button.get("hover_color"))
-        close_pressed = uic(close_button.get("pressed_color"))
-        close_border = uic(close_button.get("border_color"))
-        close_text = uic(close_button.get("text_color"))
-        close_border_width = close_button.get("border_width")
-        close_border_radius = close_button.get("border_radius")
+        icon_border = uic(input_theme.get(Theme.Components.Input.BORDER_COLOR))
+        icon_border_width = input_theme.get(Theme.Components.Input.BORDER_WIDTH)
+        icon_border_radius = input_theme.get(Theme.Components.Input.BORDER_RADIUS)
+        icon_color = uic(icon_theme.get(Theme.Components.Icon.COLOR))
+        title_color = uic(title_text.get(Theme.Components.Text.COLOR))
+        description_color = uic(muted_text.get(Theme.Components.Text.COLOR))
+        divider_color = uic(dialog_theme.get(Theme.Components.Dialog.BORDER_COLOR))
+        field_label_color = uic(muted_text.get(Theme.Components.Text.COLOR))
+        field_value_color = uic(normal_text.get(Theme.Components.Text.COLOR))
+        close_background = uic(
+            close_button.get(Theme.Components.Button.BACKGROUND_COLOR)
+        )
+        close_hover = uic(close_button.get(Theme.Components.Button.HOVER_COLOR))
+        close_pressed = uic(close_button.get(Theme.Components.Button.PRESSED_COLOR))
+        close_border = uic(close_button.get(Theme.Components.Button.BORDER_COLOR))
+        close_text = uic(close_button.get(Theme.Components.Button.TEXT_COLOR))
+        close_border_width = close_button.get(Theme.Components.Button.BORDER_WIDTH)
+        close_border_radius = close_button.get(Theme.Components.Button.BORDER_RADIUS)
+        normal_button_background = uic(
+            normal_button.get(Theme.Components.Button.BACKGROUND_COLOR)
+        )
+        normal_button_hover = uic(
+            normal_button.get(Theme.Components.Button.HOVER_COLOR)
+        )
+        normal_button_pressed = uic(
+            normal_button.get(Theme.Components.Button.PRESSED_COLOR)
+        )
+        normal_button_border = uic(
+            normal_button.get(Theme.Components.Button.BORDER_COLOR)
+        )
+        normal_button_text = uic(normal_button.get(Theme.Components.Button.TEXT_COLOR))
 
         def _safe(val, fallback):
             return val if val else fallback
@@ -362,14 +351,65 @@ class AppInfoDialog(QDialog):
                 font-size: 13px;
             }}
 
+            QPushButton#closeInfoButton:hover {{
+                background-color: {close_hover};
+            }}
+
+            QPushButton#closeInfoButton:pressed {{
+                background-color: {close_pressed};
+            }}
+
             QPushButton#actionButton {{
-                background-color: {_safe(uic(Theme.get_button(Theme.BUTTON_NORMAL).get("background_color")), "#2d89ff")};
-                color: white;
-                border: none;
-                padding: 8px 14px;
+                background-color: {normal_button_background};
+                color: {normal_button_text};
+                border: 1px solid {normal_button_border};
+                padding: 8px;
                 border-radius: 8px;
-                min-height: 36px;
                 font-size: 13px;
+            }}
+
+            QPushButton#actionButton:hover {{
+                background-color: {normal_button_hover};
+            }}
+
+            QPushButton#actionButton:pressed {{
+                background-color: {normal_button_pressed};
+            }}
+
+            QPushButton#actionButton:disabled {{
+                background-color: transparent;
+                color: {field_label_color};
+                border: 1px solid {container_border};
+            }}
+
+            QCheckBox#enabledCheck {{
+                color: {field_value_color};
+                font-size: 13px;
+            }}
+
+            /* reserve stable indicator space and spacing so text doesn't shift */
+            QCheckBox#enabledCheck::indicator {{
+                width: 16px;
+                height: 16px;
+                margin-right: 0px;
+                border: 1px solid {container_border};
+                border-radius: 3px;
+                background: transparent;
+            }}
+
+            QCheckBox#enabledCheck::indicator:checked {{
+                background: {_safe(uic(Theme.get_button(Theme.BUTTON_POSITIVE).get("background_color")), "#2fa84f")};
+                border: 1px solid {_safe(uic(Theme.get_button(Theme.BUTTON_POSITIVE).get("background_color")), "#2fa84f")};
+            }}
+
+            QCheckBox#enabledCheck:disabled {{
+                color: {field_label_color};
+            }}
+
+            QCheckBox#enabledCheck:disabled::indicator {{
+                border-color: {container_border};
+                background: transparent;
+                opacity: 0.7;
             }}
         """)
 
@@ -389,35 +429,98 @@ class AppInfoDialog(QDialog):
             or ""
         ).strip()
 
-    def set_loading(self, loading: bool):
-        self.progress.setVisible(bool(loading))
-        try:
-            self.action_button.setEnabled(not bool(loading))
-        except Exception:
-            pass
-
     def _start_fetch(self):
         manifest_url = self._get_manifest_url()
         if not manifest_url:
-            self.set_loading(False)
             return
 
-        self.fetch_thread = QThread(self)
-        self.fetch_worker = ManifestFetchWorker(manifest_url)
-        self.fetch_worker.moveToThread(self.fetch_thread)
+        try:
+            self._network = QNetworkAccessManager(self)
+            req = QNetworkRequest()
+            req.setUrl(QUrl(str(manifest_url)))
+            req.setRawHeader(b"User-Agent", b"eDock-Spotlight/0.1")
+            req.setRawHeader(b"Accept", b"application/json")
+            reply = self._network.get(req)
 
-        self.fetch_thread.started.connect(self.fetch_worker.run)
-        self.fetch_worker.finished.connect(self._on_manifest_loaded)
-        self.fetch_worker.finished.connect(self.fetch_thread.quit)
-        self.fetch_worker.failed.connect(self._on_manifest_failed)
-        self.fetch_worker.finished.connect(self.fetch_worker.deleteLater)
-        self.fetch_thread.finished.connect(self.fetch_thread.deleteLater)
+            def _on_finished(rply):
+                try:
+                    try:
+                        url = rply.url().toString()
+                    except Exception:
+                        url = str(manifest_url)
+                    try:
+                        code = rply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
+                    except Exception:
+                        code = None
+                    err_code = rply.error()
+                    err_str = rply.errorString() if hasattr(rply, "errorString") else ""
 
-        self.fetch_thread.start()
+                    err_num = None
+                    err_name = None
+                    try:
+                        err_num = int(err_code)
+                    except Exception:
+                        try:
+                            err_name = getattr(err_code, "name", None) or str(err_code)
+                        except Exception:
+                            err_name = str(err_code)
+
+                    is_error = False
+                    if err_num is not None:
+                        if err_num != 0:
+                            is_error = True
+                    else:
+                        if err_name and "NoError" not in err_name:
+                            is_error = True
+
+                    if is_error:
+                        err_code_repr = err_num if err_num is not None else err_name
+                        msg = f"Network error {err_code_repr}: {err_str} | url={url} | http_status={code}"
+                        self._on_manifest_failed(msg)
+                        self._on_manifest_loaded({})
+                        return
+
+                    data = rply.readAll().data()
+                    try:
+                        parsed = json.loads(data.decode("utf-8")) if data else {}
+                    except Exception:
+                        parsed = {}
+                    self._on_manifest_loaded(parsed if isinstance(parsed, dict) else {})
+                except Exception as e:
+                    msg = f"Exception handling network reply: {e} | url={manifest_url}"
+                    self._on_manifest_failed(msg)
+                    self._on_manifest_loaded({})
+
+            reply.finished.connect(lambda: _on_finished(reply))
+        except Exception:
+            QTimer.singleShot(0, lambda: self._on_manifest_loaded({}))
+
+    def closeEvent(self, event):
+        try:
+            super().closeEvent(event)
+        except Exception:
+            event.accept()
+
+    def _on_action_clicked(self):
+        try:
+            if not getattr(self, "action_button", None):
+                return
+            if not self.action_button.isEnabled():
+                return
+            self.accept()
+        except Exception:
+            return
 
     def _on_manifest_failed(self, message: str):
         if message:
-            print(f"Manifest fetch error: {message}")
+            pass
+        try:
+            try:
+                self.description_label.setText(f"Manifest fetch error: {message}")
+            except Exception:
+                pass
+        except Exception:
+            pass
 
     def _on_manifest_loaded(self, data: dict):
         self.manifest_data = data if isinstance(data, dict) else {}
@@ -451,24 +554,18 @@ class AppInfoDialog(QDialog):
             self.action_button.setEnabled(True)
         except Exception:
             pass
-        self.set_loading(False)
 
         try:
-            meta = merged.get("metadata", {}) or {}
-            online_v = meta.get("online_version") or merged.get("version")
-            local_v = meta.get("local_version")
-            action_label = "Install"
-            if online_v and local_v:
-                try:
-                    from packaging.version import Version
+            self._update_action_button(merged)
+        except Exception:
+            pass
 
-                    if Version(str(online_v)) > Version(str(local_v)):
-                        action_label = "Update"
-                except Exception:
-                    if str(online_v) != str(local_v):
-                        action_label = "Update"
-
-            self.action_button.setText(action_label)
+        try:
+            try:
+                if not self.manifest_data:
+                    self.description_label.setText("Manifest loaded (no manifest data)")
+            except Exception:
+                pass
         except Exception:
             pass
 
@@ -477,6 +574,71 @@ class AppInfoDialog(QDialog):
         merged.update(self.app_data)
         merged.update(self.manifest_data)
         return merged
+
+    def _update_action_button(self, merged: dict):
+        try:
+            meta = merged.get("metadata", {}) or {}
+            online_v = meta.get("online_version") or merged.get("version")
+            local_v = meta.get("local_version")
+            action_label = "Install"
+            try:
+                app_meta = self.app_data.get("metadata", {}) or {}
+                installed = bool(
+                    app_meta.get("installed")
+                    or self.app_data.get("installed")
+                    or meta.get("installed")
+                    or merged.get("installed")
+                    or False
+                )
+            except Exception:
+                installed = bool(
+                    meta.get("installed") or merged.get("installed") or False
+                )
+
+            if online_v and local_v:
+                try:
+                    from packaging.version import Version
+
+                    ov = Version(str(online_v))
+                    lv = Version(str(local_v))
+                    if ov > lv:
+                        action_label = "Update"
+                    elif lv > ov:
+                        action_label = "Installed"
+                except Exception:
+                    if str(online_v) != str(local_v):
+                        action_label = "Update"
+                    else:
+                        if installed:
+                            action_label = "Installed"
+
+            if installed and action_label == "Install":
+                action_label = "Installed"
+
+            try:
+                self.action_button.setText(action_label)
+            except Exception:
+                pass
+
+            try:
+                if action_label == "Installed":
+                    self.action_button.setEnabled(False)
+                else:
+                    self.action_button.setEnabled(True)
+
+                if action_label == "Update":
+                    btn_theme = Theme.get_button(Theme.BUTTON_POSITIVE)
+                    bg = Theme.to_ui_color(btn_theme.get("background_color"))
+                    textc = Theme.to_ui_color(btn_theme.get("text_color"))
+                    self.action_button.setStyleSheet(
+                        f"background-color: {bg}; color: {textc}; border: none; padding: 8px 14px; border-radius: 8px; min-height: 36px; font-size: 13px;"
+                    )
+                else:
+                    self.action_button.setStyleSheet("")
+            except Exception:
+                pass
+        except Exception:
+            pass
 
     def _build_info_text(self, data: dict) -> str:
         keys = [
@@ -512,6 +674,34 @@ class AppInfoDialog(QDialog):
             return json.dumps(data, indent=2, ensure_ascii=False)
 
         return "\n".join(lines)
+
+    def _on_enabled_toggled(self, app_id: str, state: int):
+        try:
+            from core.paths import get_user_config_path
+
+            p = Path(get_user_config_path())
+            cfg = {}
+            if p.exists():
+                try:
+                    cfg = json.loads(p.read_text(encoding="utf-8")) or {}
+                except Exception:
+                    cfg = {}
+
+            apps = cfg.get("apps", {}) if isinstance(cfg, dict) else {}
+            if not isinstance(apps, dict):
+                apps = {}
+
+            entry = apps.get(app_id) or {}
+            entry["enabled"] = bool(state)
+            apps[app_id] = entry
+            cfg["apps"] = apps
+
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(
+                json.dumps(cfg, indent=2, ensure_ascii=False), encoding="utf-8"
+            )
+        except Exception:
+            pass
 
     def _populate_info_grid(self, data: dict):
 
@@ -568,4 +758,7 @@ class AppInfoDialog(QDialog):
             except Exception:
                 pass
             self.info_grid.addWidget(lbl, row_index, 0)
-            self.info_grid.addWidget(val, row_index, 1)
+            if item[0] == "Version":
+                self.info_grid.addWidget(val, row_index, 1)
+            else:
+                self.info_grid.addWidget(val, row_index, 1)

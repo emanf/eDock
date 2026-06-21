@@ -115,8 +115,76 @@ class AppsSearchWorker(QObject):
                     self.finished.emit(self.search_id, [])
                     return
                 registry_service = RegistryService()
+                try:
+                    registry_service.refresh_packages()
+                except Exception:
+                    pass
+
                 registry_provider = RegistryProvider(registry_service, installed_ids)
-                registry_results = registry_provider.search(self.query, worker=self)
+                registry_results = []
+
+                if self.query:
+                    registry_results = registry_provider.search(self.query, worker=self)
+                else:
+                    try:
+                        packages = registry_service.get_packages()
+                        for pkg in packages:
+                            if self.is_cancelled():
+                                self.finished.emit(self.search_id, [])
+                                return
+                            try:
+                                normalized = registry_provider._normalize_package(pkg)
+                                if not normalized:
+                                    continue
+
+                                try:
+                                    manifest_url = (
+                                        normalized.get("manifest")
+                                        or normalized.get("manifest_url")
+                                        or None
+                                    )
+                                    if manifest_url:
+                                        try:
+                                            text = registry_service._read_text_source(
+                                                manifest_url
+                                            )
+                                            if text:
+                                                try:
+                                                    mdata = json.loads(text)
+                                                    if isinstance(mdata, dict):
+                                                        normalized.update({
+                                                            k: v for k, v in mdata.items()
+                                                        })
+                                                except Exception:
+                                                    pass
+                                        except Exception:
+                                            pass
+
+                                except Exception:
+                                    pass
+
+                                try:
+                                    app_id = str(normalized.get("id") or normalized.get("app_id") or "").strip()
+                                    local_provider = LocalAppsProvider()
+                                    apps_dir = local_provider.apps_dir
+                                    if app_id and apps_dir and apps_dir.exists():
+                                        app_json = apps_dir / app_id / "app.json"
+                                        if app_json.exists():
+                                            try:
+                                                aj = json.loads(app_json.read_text(encoding="utf-8"))
+                                                if isinstance(aj, dict):
+                                                    normalized.update({k: v for k, v in aj.items()})
+                                            except Exception:
+                                                pass
+                                except Exception:
+                                    pass
+
+                                sr = registry_provider._package_to_result(normalized)
+                                registry_results.append(sr)
+                            except Exception:
+                                continue
+                    except Exception:
+                        registry_results = []
 
                 merged = self._merge_local_and_registry(local_results, registry_results)
                 results = []

@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "title": "eDock",
+  "description": "a Python desktop dock that sits on the edge of your screen and gives you quick access to small apps and tools.",
+  "version": "0.1.0",
+  "last_modified": "2026-06-17",
+  "author": "eManF",
+  "author_email": "emanf.co@gmail.com",
+  "author_website": "https://github.com/eManF",
+  "icon": "",
+  "homepage": "https://github.com/eManF/eDock",
+  "repository": "https://github.com/eManF/eDock",
+  "download": "https://github.com/eManF/eDock/releases/latest/download/app.zip",
+  "manifest": "https://raw.githubusercontent.com/eManF/eDock/main/main.json",
+  "changelog": "https://github.com/eManF/eDock/releases/changelog.md",
+  "license": ""
+}
