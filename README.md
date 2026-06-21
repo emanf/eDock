@@ -1,6 +1,6 @@
 <p align="center">
-  <img src="edock_logo.jpg" align="left" width="300" alt="eDock Logo">
-  <img src="edock.gif" align="right" width="250">
+  <img src="edock_logo.jpg" width="300" alt="eDock Logo">
+  <img src="edock.gif" width="250">
 </p>
 
 # eDock
