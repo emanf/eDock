@@ -24,9 +24,8 @@ https://www.python.org/downloads/
 https://github.com/git-guides/install-git
 ```
 
-(all below commands should run in *cmd* or *terminal*)
 ## 3. Clone the repository:
-Run the following commands in *Command Prompt (Windows)* or *Terminal (macOS/Linux)*:
+Run the following commands in **Command Prompt (Windows)** or **Terminal (macOS/Linux)**:
 ```bash
 git clone https://github.com/emanf/edock.git
 ```
