@@ -2,22 +2,20 @@
   <img src="edock_logo.jpg" width="300" alt="eDock Logo">
 </p>
 
-<table width="100%" border="0">
+<table width="100%" style="border:none;border-collapse:collapse;">
   <tr>
-    <td width="55%" valign="middle">
-      <h1 align="center">eDock</h1>
-      <p align="center">
-        <b>A desktop dock for running open-source Python apps directly from source code.</b>
-      </p>
-      <p align="center">
-        Build apps. Drop them into the dock. Launch, inspect, and improve them.
-      </p>
+    <td width="55%" valign="middle" style="border:none;">
+      <h1>eDock</h1>
+      <p><b>A desktop dock for running open-source Python apps directly from source code.</b></p>
+      <p>Build apps. Drop them into the dock. Launch, inspect, and improve them.</p>
     </td>
-    <td width="45%" valign="middle">
+  
+    <td width="45%" valign="middle" style="border:none;">
       <img src="edock.gif" alt="eDock Preview" width="100%">
     </td>
   </tr>
 </table>
+
 ---
 
 ## What is eDock?
