@@ -91,3 +91,14 @@ You can help by:
 - Improving the UI
 - Creating eDock apps
 - Improving documentation
+
+# App Registry
+
+eDock includes a public app registry where developers can publish and distribute their apps.
+The registry repository contains the app indexes and packages used by eDock to discover and install apps.
+Developers can submit their apps to the registry so they become available for all eDock users.
+App submissions are automated and reviewed through the registry workflow.
+For details on how the registry works and how to submit an app, see:
+```text
+https://github.com/emanf/eDock-Apps
+```
