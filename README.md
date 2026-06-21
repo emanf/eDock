@@ -11,38 +11,6 @@ Each icon in the dock is a real Python app.
 
 eDock is designed for an open app ecosystem where every app stays accessible, readable, and extensible.
 
-## How eDock apps work
-
-Every app in eDock is an independent Python app with its own folder, files, and configuration.
-
-That means:
-
-- each app is isolated
-- apps can be added or removed easily
-- apps can be updated independently
-- app source code stays open and editable
-- the dock acts as a launcher and host for source-based apps
-
-If you want to create automation tools, utilities, bots, experiments, or personal desktop helpers, eDock gives you a simple way to turn them into dock apps.
-
-## Why eDock?
-
-eDock is built around a simple idea:
-
-**Apps should be easy to run, easy to inspect, and easy to modify.**
-
-Instead of hiding app logic behind compiled packages, eDock keeps apps in plain Python source form. This makes it especially useful for developers who want control, transparency, and fast iteration.
-
-## Features
-
-- desktop dock UI for launching apps
-- apps run directly from Python source code
-- every app is open and editable
-- simple app-based structure
-- easy to extend with your own apps
-- source-available project
-- built with Python
-
 ---
 # Usage
 
