@@ -1,22 +1,31 @@
-<p align="center"><img src="edock_logo.jpg" width="300" alt="Logo"></p>
+<p align="center">
+  <img src="edock_logo.jpg" width="300" alt="eDock Logo">
+  <img src="edock.gif" width="250">
+</p>
 
-**Build, discover, install, and run Python apps from source code.**
+# eDock
 
-eDock is a free, source-available Python project that gives developers a simple workflow for creating automation apps, bots, tools, and utilities.
+eDock is a Python desktop dock that sits on the edge of your screen and gives you quick access to small apps and tools.
 
-Users can search for apps, install them, edit their source code, and run them directly from source.
+Each icon in the dock is a real Python app.
 
-Every eDock app is open, editable, and easy to improve.
+eDock is designed for an open app ecosystem where every app stays accessible, readable, and extensible.
 
 ---
 # Usage
 
-Download Python:
-```bash
+## 1. Install Python:
+```text
 https://www.python.org/downloads/
 ```
 
-Clone the repository:
+## 2. Install Git:
+```text
+https://github.com/git-guides/install-git
+```
+
+## 3. Clone the repository:
+Run the following commands in **Command Prompt (Windows)** or **Terminal (macOS/Linux)**:
 ```bash
 git clone https://github.com/emanf/edock.git
 ```
@@ -24,17 +33,17 @@ git clone https://github.com/emanf/edock.git
 cd edock
 ```
 
-Install pip:
+## 4. Install pip:
 ```bash
 python -m ensurepip --upgrade
 ```
 
-Install dependencies:
+## 5. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-Run eDock:
+## 6. Run eDock:
 ```bash
 python main.py
 ```
@@ -57,4 +66,13 @@ You can help by:
 - Creating eDock apps
 - Improving documentation
 
-Fork the repository, make your changes, and open a pull request.
+# App Registry
+
+eDock includes a public app registry where developers can publish and distribute their apps.
+The registry repository contains the app indexes and packages used by eDock to discover and install apps.
+Developers can submit their apps to the registry so they become available for all eDock users.
+App submissions are automated and reviewed through the registry workflow.
+For details on how the registry works and how to submit an app, see:
+```text
+https://github.com/emanf/eDock-Apps
+```
