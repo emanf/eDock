@@ -26,3 +26,10 @@ backups/
 # Ignore Git directories and files
 **/.git/
 **/.git
+
+# Ignore all files in the apps directory except for emanf.spotlight and emanf.theme_manager
+/apps/*
+!/apps/emanf.spotlight/
+!/apps/emanf.spotlight/**
+!/apps/emanf.theme_manager/
+!/apps/emanf.theme_manager/**
