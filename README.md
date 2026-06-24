@@ -47,6 +47,10 @@ pip install -r requirements.txt
 ```bash
 python main.py
 ```
+or
+```bash
+pyw main.py
+```
 
 ---
 
