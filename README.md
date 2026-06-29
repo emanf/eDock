@@ -5,9 +5,9 @@
 
 # eDock
 
-eDock is a Python desktop dock that sits on the edge of your screen and gives you quick access to small apps and tools.
+eDock is a simple place for people to build, place, and share small apps.
 
-Each icon in the dock is a real Python app.
+It started as a long-time idea: a dock where each icon can launch a separate Python app, keeping every app independent and easy to update without changing the others. The project was originally written in AutoIt Script, but it moved to Python because Python fits the idea better and makes the project easier to grow and share.
 
 eDock is designed for an open app ecosystem where every app stays accessible, readable, and extensible.
 
