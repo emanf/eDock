@@ -44,7 +44,9 @@ class AppInfoDialog(QDialog):
         self._apply_style()
 
         try:
-            self._update_action_button(self._get_merged_data())
+            merged = self._get_merged_data()
+            self._update_action_button(merged)
+            self._update_toggle_button(merged)
         except Exception:
             pass
         self._saved_description = None
@@ -155,12 +157,19 @@ class AppInfoDialog(QDialog):
         buttons_layout.addStretch(1)
 
         self.close_info_button = QPushButton("Close", self)
-        self.close_info_button.setObjectName("actionButton")
+        self.close_info_button.setObjectName("closeInfoButton")
         self.close_info_button.clicked.connect(self.reject)
+
+        self.toggle_button = QPushButton("Enable", self)
+        self.toggle_button.setObjectName("actionButton")
+        self.toggle_button.clicked.connect(self._on_toggle_clicked)
+        self.toggle_button.setVisible(False)
+        self.toggle_button.setMinimumHeight(32)
 
         self.action_button = QPushButton("Install", self)
         self.action_button.setObjectName("actionButton")
         self.action_button.clicked.connect(self._on_action_clicked)
+        self.action_button.setMinimumHeight(32)
 
         try:
             self.action_button.setEnabled(True)
@@ -169,6 +178,7 @@ class AppInfoDialog(QDialog):
             pass
 
         buttons_layout.addWidget(self.close_info_button)
+        buttons_layout.addWidget(self.toggle_button)
         buttons_layout.addWidget(self.action_button)
 
         layout.addLayout(buttons_layout)
@@ -511,6 +521,123 @@ class AppInfoDialog(QDialog):
         except Exception:
             return
 
+    def _get_app_id(self, merged: dict) -> str:
+        app_id = str(
+            merged.get("id")
+            or merged.get("app_id")
+            or self.app_data.get("id")
+            or self.app_data.get("app_id")
+            or ""
+        ).strip()
+        return app_id
+
+    def _is_installed(self, merged: dict) -> bool:
+        try:
+            kind = str(merged.get("kind") or "").lower().strip()
+            if kind == "local":
+                return True
+
+            meta = merged.get("metadata", {}) or {}
+            app_meta = self.app_data.get("metadata", {}) or {}
+            installed = bool(
+                app_meta.get("installed")
+                or self.app_data.get("installed")
+                or meta.get("installed")
+                or merged.get("installed")
+            )
+            return installed
+        except Exception:
+            try:
+                meta = merged.get("metadata", {}) or {}
+                return bool(meta.get("installed") or merged.get("installed"))
+            except Exception:
+                return False
+
+    def _get_enabled(self, merged: dict) -> bool:
+        app_id = self._get_app_id(merged)
+        if app_id:
+            try:
+                from core.paths import get_user_config_path
+
+                p = Path(get_user_config_path())
+                if p.exists():
+                    cfg = json.loads(p.read_text(encoding="utf-8")) or {}
+                    apps = cfg.get("apps", {}) if isinstance(cfg, dict) else {}
+                    if isinstance(apps, dict):
+                        entry = apps.get(app_id)
+                        if entry is None:
+                            entry = apps.get(app_id.lower())
+                        if isinstance(entry, dict) and "enabled" in entry:
+                            return bool(entry.get("enabled", False))
+            except Exception:
+                pass
+
+        try:
+            if "enabled" in merged:
+                return bool(merged.get("enabled", False))
+        except Exception:
+            pass
+
+        return False
+
+    def _set_enabled(self, app_id: str, enabled: bool):
+        try:
+            from core.paths import get_user_config_path
+
+            p = Path(get_user_config_path())
+            cfg = {}
+            if p.exists():
+                try:
+                    cfg = json.loads(p.read_text(encoding="utf-8")) or {}
+                except Exception:
+                    cfg = {}
+
+            apps = cfg.get("apps", {}) if isinstance(cfg, dict) else {}
+            if not isinstance(apps, dict):
+                apps = {}
+
+            entry = apps.get(app_id) or apps.get(app_id.lower()) or {}
+            if not isinstance(entry, dict):
+                entry = {}
+            entry["enabled"] = bool(enabled)
+            apps[app_id] = entry
+            cfg["apps"] = apps
+
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(json.dumps(cfg, indent=2, ensure_ascii=False), encoding="utf-8")
+        except Exception:
+            pass
+
+    def _on_toggle_clicked(self):
+        merged = self._get_merged_data()
+        app_id = self._get_app_id(merged)
+        if not app_id:
+            return
+
+        try:
+            enabled = self._get_enabled(merged)
+            self._set_enabled(app_id, not enabled)
+            self._update_toggle_button(merged)
+        except Exception:
+            pass
+
+    def _update_toggle_button(self, merged: dict):
+        try:
+            if not getattr(self, "toggle_button", None):
+                return
+
+            installed = self._is_installed(merged)
+            self.toggle_button.setVisible(bool(installed))
+            if not installed:
+                return
+
+            enabled = self._get_enabled(merged)
+            self.toggle_button.setText("Disable" if enabled else "Enable")
+            self.toggle_button.setEnabled(True)
+            self.toggle_button.setStyleSheet("")
+        except Exception:
+            pass
+
     def _on_manifest_failed(self, message: str):
         if message:
             pass
@@ -557,6 +684,7 @@ class AppInfoDialog(QDialog):
 
         try:
             self._update_action_button(merged)
+            self._update_toggle_button(merged)
         except Exception:
             pass
 

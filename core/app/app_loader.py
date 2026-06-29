@@ -343,8 +343,12 @@ class AppLoader:
             module = importlib.util.module_from_spec(spec)
             module.__package__ = package_name
 
-            old_package = sys.modules.get(package_name)
-            old_module = sys.modules.get(module_name)
+            removed_modules = {}
+            for name in list(sys.modules.keys()):
+                if name == package_name or name == module_name or name.startswith(
+                    f"{package_name}."
+                ):
+                    removed_modules[name] = sys.modules.pop(name)
 
             sys.modules[package_name] = package
             sys.modules[module_name] = module
@@ -352,16 +356,10 @@ class AppLoader:
             try:
                 spec.loader.exec_module(module)
             except Exception:
-                if old_package is not None:
-                    sys.modules[package_name] = old_package
-                else:
-                    sys.modules.pop(package_name, None)
-
-                if old_module is not None:
-                    sys.modules[module_name] = old_module
-                else:
-                    sys.modules.pop(module_name, None)
-
+                for name, mod in removed_modules.items():
+                    sys.modules[name] = mod
+                sys.modules.pop(package_name, None)
+                sys.modules.pop(module_name, None)
                 raise
             finally:
                 if inserted:

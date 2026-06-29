@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 from PySide6.QtCore import QObject, Signal
 
 from ..providers.local_apps_provider import LocalAppsProvider
@@ -23,6 +24,28 @@ class SearchWorker(QObject):
     def is_cancelled(self):
         return self._cancelled
 
+    def _get_enabled_app_ids(self) -> set:
+        enabled = set()
+        try:
+            from core.paths import get_user_config_path
+
+            path = get_user_config_path()
+            p = Path(path)
+            if p.exists():
+                data = json.loads(p.read_text(encoding="utf-8"))
+                apps = data.get("apps", {}) if isinstance(data, dict) else {}
+                if isinstance(apps, dict):
+                    for app_id, entry in apps.items():
+                        try:
+                            if bool(entry.get("enabled", False)):
+                                enabled.add(str(app_id).strip().lower())
+                        except Exception:
+                            pass
+        except Exception:
+            pass
+
+        return enabled
+
     def run(self):
         results = []
         try:
@@ -32,6 +55,7 @@ class SearchWorker(QObject):
 
             provider = LocalAppsProvider()
             items = provider.search(self.query, worker=self)
+            enabled_ids = self._get_enabled_app_ids()
 
             if self.is_cancelled():
                 self.finished.emit(self.search_id, [])
@@ -42,6 +66,18 @@ class SearchWorker(QObject):
                     self.finished.emit(self.search_id, [])
                     return
                 try:
+                    kind = ""
+                    app_id = ""
+                    if isinstance(item, dict):
+                        kind = str(item.get("kind", "")).lower().strip()
+                        app_id = str(item.get("id", "") or "").strip().lower()
+                    else:
+                        kind = str(getattr(item, "kind", "") or "").lower().strip()
+                        app_id = str(getattr(item, "id", "") or "").strip().lower()
+
+                    if kind == KIND_LOCAL and app_id and app_id not in enabled_ids:
+                        continue
+
                     results.append(item.to_dict())
                 except Exception:
                     if isinstance(item, dict):

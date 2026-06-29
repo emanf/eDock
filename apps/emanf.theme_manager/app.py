@@ -605,17 +605,17 @@ class ThemeManagerWindow(QDialog):
             return
         theme_id = Theme.normalize_theme_id(name)
         if not theme_id:
-            self._show_message(
+            MessageDialog.warning(
+                self,
                 "Invalid Name",
-                "Theme name cannot be empty.",
-                MessageDialog.Icon.WARNING,
+                "Theme name cannot be empty."
             )
             return
         if Theme.theme_exists(theme_id):
-            self._show_message(
+            MessageDialog.warning(
+                self,
                 "Duplicate Theme",
-                "A theme with this name already exists.",
-                MessageDialog.Icon.WARNING,
+                "A theme with this name already exists."
             )
             return
         Theme.create_user_theme(theme_id, str(name), Theme.get_current_theme_id())
@@ -644,17 +644,17 @@ class ThemeManagerWindow(QDialog):
             return
         theme_id = Theme.normalize_theme_id(name)
         if not theme_id:
-            self._show_message(
+            MessageDialog.warning(
+                self,
                 "Invalid Name",
-                "Theme name cannot be empty.",
-                MessageDialog.Icon.WARNING,
+                "Theme name cannot be empty."
             )
             return
         if Theme.theme_exists(theme_id):
-            self._show_message(
+            MessageDialog.warning(
+                self,
                 "Duplicate Theme",
-                "A theme with this name already exists.",
-                MessageDialog.Icon.WARNING,
+                "A theme with this name already exists."
             )
             return
         data = deepcopy(self._get_merged_theme())
@@ -686,10 +686,10 @@ class ThemeManagerWindow(QDialog):
         if str(meta.get("type", "")).strip().lower() != "user":
             return
         if self._is_entry_active(entry):
-            self._show_message(
+            MessageDialog.warning(
+                self,
                 "Cannot Remove Active Theme",
-                "Apply another theme before removing the active user theme.",
-                MessageDialog.Icon.WARNING,
+                "Apply another theme before removing the active user theme."
             )
             return
         title = meta.get("name") or entry.display_name
@@ -719,16 +719,16 @@ class ThemeManagerWindow(QDialog):
             return
         try:
             if entry.path is None or not Path(entry.path).exists():
-                self._show_message(
+                MessageDialog.warning(
+                    self,
                     "Remove Failed",
-                    "Could not find the selected theme file.",
-                    MessageDialog.Icon.WARNING,
+                    "Could not find the selected theme file."
                 )
                 return
             Path(entry.path).unlink()
             Theme.reload()
         except Exception as e:
-            self._show_message("Remove Failed", str(e), MessageDialog.Icon.WARNING)
+            MessageDialog.warning(self, "Remove Failed", str(e))
             return
         self._load_theme_list()
         self.current_theme_id = Theme.get_current_theme_id()
@@ -736,17 +736,18 @@ class ThemeManagerWindow(QDialog):
         self._load_selected_theme_editor()
         self._update_editor_state()
         self._refresh_preview()
-        self._show_message(
-            "Removed", "Theme removed successfully.", MessageDialog.Icon.SUCCESS
+        MessageDialog.success(
+            self,
+            "Removed", "Theme removed successfully."
         )
 
     def _save_theme(self):
         entry = self._get_selected_entry()
         if entry is None or not entry.editable:
-            self._show_message(
+            MessageDialog.warning(
+                self,
                 "Read Only Theme",
-                "Only user themes can be saved.",
-                MessageDialog.Icon.WARNING,
+                "Only user themes can be saved."
             )
             return
         data = self._read_override_or_alert()
@@ -756,8 +757,9 @@ class ThemeManagerWindow(QDialog):
         Theme.reload()
         self._load_theme_list()
         self._select_current_theme()
-        self._show_message(
-            "Saved", "Theme saved successfully.", MessageDialog.Icon.SUCCESS
+        MessageDialog.success(
+            self,
+            "Saved", "Theme saved successfully."
         )
 
     def _apply_theme(self):
@@ -1011,7 +1013,7 @@ class ThemeManagerWindow(QDialog):
                 border: 1px solid transparent;
             }}
             QListWidget#themeList {{
-                background: {panel_bg};
+                background: {window_bg};
                 border: 1px solid {border_color};
                 border-radius: 12px;
                 color: {title_text_color};
@@ -1052,7 +1054,7 @@ class ThemeManagerWindow(QDialog):
                 border-radius: 14px;
             }}
             QPlainTextEdit#overrideEditor {{
-                background: {editor_bg};
+                background: {window_bg};
                 border: 1px solid {border_color};
                 border-radius: 12px;
                 color: {title_text_color};
@@ -1261,7 +1263,7 @@ class ThemeManagerWindow(QDialog):
                 if error == "Theme JSON must be a JSON object."
                 else "Invalid JSON"
             )
-            self._show_message(title, error, MessageDialog.Icon.WARNING)
+            MessageDialog.warning(self, title, error)
             return None
         return value
 
@@ -1320,9 +1322,6 @@ class ThemeManagerWindow(QDialog):
                 self.dock.update()
             except Exception:
                 pass
-
-    def _show_message(self, title, text, icon=MessageDialog.Icon.INFO):
-        MessageDialog.show(self, title=title, subtitle=text, icon=icon)
 
     def _display_name(self, value):
         return str(value).replace("-", " ").replace("_", " ").title()

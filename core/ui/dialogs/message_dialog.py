@@ -39,8 +39,7 @@ class MessageDialog(QDialog):
         self.button_text = str(button_text or "OK")
         self.on_close = on_close
         self.result_value = None
-
-        MaterialIcons.ensure_font()
+        self.loaded_font_family = MaterialIcons.ensure_font()
 
         self.setModal(True)
         self.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint)
@@ -69,7 +68,7 @@ class MessageDialog(QDialog):
         icon_label.setObjectName("dialogIcon")
         icon_label.setFixedSize(68, 68)
         icon_label.setAlignment(Qt.AlignCenter)
-        icon_label.setFont(QFont(MaterialIcons.font_family(), 34))
+        icon_label.setFont(QFont(self.loaded_font_family, 34))
 
         text_container = QWidget()
         text_layout = QVBoxLayout(text_container)
@@ -90,7 +89,7 @@ class MessageDialog(QDialog):
         dismiss_button = QPushButton(MaterialIcons.get("close"))
         dismiss_button.setObjectName("closeButton")
         dismiss_button.setFixedSize(24, 24)
-        dismiss_button.setFont(QFont(MaterialIcons.font_family(), 14))
+        dismiss_button.setFont(QFont(self.loaded_font_family, 14))
         dismiss_button.clicked.connect(self.handle_close)
 
         header_layout.addWidget(icon_label)
@@ -263,6 +262,9 @@ class MessageDialog(QDialog):
                 border: {close_border_width}px solid {close_border};
                 border-radius: {close_border_radius}px;
                 padding: 0;
+                font-family: "{self.loaded_font_family}";
+                font-size: 14pt;
+                font-weight: 400;
             }}
 
             QPushButton#closeButton:hover {{
@@ -278,6 +280,9 @@ class MessageDialog(QDialog):
                 color: {icon_color};
                 border: {icon_border_width}px solid {icon_border};
                 border-radius: {icon_border_radius}px;
+                font-family: "{self.loaded_font_family}";
+                font-size: 34pt;
+                font-weight: 400;
             }}
 
             QLabel#dialogTitle {{
@@ -338,11 +343,11 @@ class MessageDialog(QDialog):
         self.accept()
 
     @staticmethod
-    def show(
-        parent=None,
+    def _show(
         title="Message",
         subtitle="",
         icon=Icon.INFO,
+        parent=None,
         button_text="OK",
         on_close=None,
     ):
@@ -358,3 +363,76 @@ class MessageDialog(QDialog):
         dialog.exec()
 
         return dialog.result_value
+
+    @staticmethod
+    def info(parent=None, title="Message", subtitle="", button_text="OK", on_close=None):
+        return MessageDialog._show(
+            title=title,
+            subtitle=subtitle,
+            icon=MessageDialog.Icon.INFO,
+            parent=parent,
+            button_text=button_text,
+            on_close=on_close,
+        )
+
+    @staticmethod
+    def success(parent=None, title="Message", subtitle="", button_text="OK", on_close=None):
+        return MessageDialog._show(
+            title=title,
+            subtitle=subtitle,
+            icon=MessageDialog.Icon.SUCCESS,
+            parent=parent,
+            button_text=button_text,
+            on_close=on_close,
+        )
+
+    @staticmethod
+    def warning(parent=None, title="Message", subtitle="", button_text="OK", on_close=None):
+        return MessageDialog._show(
+            title=title,
+            subtitle=subtitle,
+            icon=MessageDialog.Icon.WARNING,
+            parent=parent,
+            button_text=button_text,
+            on_close=on_close,
+        )
+
+    @staticmethod
+    def error(parent=None, title="Message", subtitle="", button_text="OK", on_close=None):
+        return MessageDialog._show(
+            title=title,
+            subtitle=subtitle,
+            icon=MessageDialog.Icon.ERROR,
+            parent=parent,
+            button_text=button_text,
+            on_close=on_close,
+        )
+
+    @staticmethod
+    def question(title="Message", subtitle="", parent=None, button_text="OK", on_close=None):
+        return MessageDialog._show(
+            title=title,
+            subtitle=subtitle,
+            icon=MessageDialog.Icon.QUESTION,
+            parent=parent,
+            button_text=button_text,
+            on_close=on_close,
+        )
+
+    @staticmethod
+    def show(
+        parent=None,
+        title="Message",
+        subtitle="",
+        icon=Icon.INFO,
+        button_text="OK",
+        on_close=None,
+    ):
+        return MessageDialog._show(
+            title=title,
+            subtitle=subtitle,
+            icon=icon,
+            parent=parent,
+            button_text=button_text,
+            on_close=on_close,
+        )

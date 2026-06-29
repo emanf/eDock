@@ -183,50 +183,62 @@ def normalize_material_icon_name(name):
 
 
 def material_icon_font_family():
-    return MATERIAL_ICONS_FONT_FAMILY
+    return MaterialIcons.font_family()
 
 
 def load_material_icons_font(font_path):
     path = Path(font_path)
-
     if not path.exists():
         return False
-
+    
     font_id = QFontDatabase.addApplicationFont(str(path))
-
-    return font_id != -1
+    if font_id == -1:
+        return False
+    
+    families = QFontDatabase.applicationFontFamilies(font_id)
+    if families:
+        MaterialIcons.FONT_FAMILY = families[0]
+        return True
+    return False
 
 
 def find_material_icons_font():
     root = paths.get_assets_dir()
     path = root / "fonts" / "MaterialIcons-Regular.ttf"
-
     if path.exists():
         return path
-
+    
+    # Fallback for app processes
+    try:
+        base_dir = Path(__file__).parent.parent.parent
+        alt_path = base_dir / "assets" / "fonts" / "MaterialIcons-Regular.ttf"
+        if alt_path.exists():
+            return alt_path
+    except:
+        pass
+        
     return None
 
 
 def ensure_material_icons_font():
+    if MaterialIcons._font_loaded:
+        return MaterialIcons.FONT_FAMILY
+        
     path = find_material_icons_font()
-
     if path is not None:
-        load_material_icons_font(path)
-
-    return MATERIAL_ICONS_FONT_FAMILY
+        if load_material_icons_font(path):
+            MaterialIcons._font_loaded = True
+            
+    return MaterialIcons.FONT_FAMILY
 
 
 def custom_material_icon(value):
     text = str(value).strip()
-
     if not text.startswith("m:"):
         return ""
-
     code = text[2:].strip()
-
     if len(code) == 1:
         return code
-
     if code.startswith("\\\\u"):
         code = code[3:]
     elif code.startswith("\\u"):
@@ -235,7 +247,6 @@ def custom_material_icon(value):
         code = code[2:]
     else:
         return ""
-
     try:
         return chr(int(code, 16))
     except ValueError:
@@ -244,23 +255,16 @@ def custom_material_icon(value):
 
 def get_material_icon(name, fallback=""):
     text = str(name).strip()
-
     if text.startswith("m:"):
         raw = text[2:].strip()
         key = normalize_material_icon_name(raw)
-
         if key in MATERIAL_ICON_CODEPOINTS:
             return MATERIAL_ICON_CODEPOINTS[key]
-
         icon = custom_material_icon(text)
-
         if icon:
             return icon
-
         return fallback
-
     key = normalize_material_icon_name(text)
-
     return MATERIAL_ICON_CODEPOINTS.get(key, fallback)
 
 
@@ -279,24 +283,18 @@ class MaterialIcons:
 
     @staticmethod
     def ensure_font():
-        if not MaterialIcons._font_loaded:
-            ensure_material_icons_font()
-            MaterialIcons._font_loaded = True
-
-        return MATERIAL_ICONS_FONT_FAMILY
+        return ensure_material_icons_font()
 
     @staticmethod
     def load_font(font_path):
-        loaded = load_material_icons_font(font_path)
-
-        if loaded:
+        if load_material_icons_font(font_path):
             MaterialIcons._font_loaded = True
-
-        return loaded
+            return True
+        return False
 
     @staticmethod
     def font_family():
-        return MATERIAL_ICONS_FONT_FAMILY
+        return MaterialIcons.ensure_font()
 
     @staticmethod
     def normalize(name):

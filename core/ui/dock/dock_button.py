@@ -188,6 +188,47 @@ class DockButton(QPushButton):
             except Exception:
                 pass
 
+    def reload_app(self):
+        app_data = getattr(self, "loaded_app", None)
+        if not isinstance(app_data, dict):
+            return
+
+        app_id = self._app_id()
+        dock_window = getattr(self, "dock_window", None)
+        if dock_window is None:
+            return
+
+        if hasattr(dock_window, "runtime_service") and dock_window.runtime_service is not None:
+            try:
+                if hasattr(dock_window.runtime_service, "unload_app"):
+                    dock_window.runtime_service.unload_app(app_id)
+            except Exception:
+                pass
+
+        # Refresh the app class using the app loader so source changes are picked up.
+        if hasattr(dock_window, "app_loader") and dock_window.app_loader is not None:
+            try:
+                refreshed_app_data = dock_window.app_loader._load_single_app(self.app_dir)
+                if isinstance(refreshed_app_data, dict) and refreshed_app_data.get("id") == app_id:
+                    app_data.clear()
+                    app_data.update(refreshed_app_data)
+                    self.set_loaded_app(app_data)
+                    self.setToolTip(app_data.get("title", app_id))
+
+                    shortcut = app_data.get("shortcut", "")
+                    if shortcut:
+                        self.set_shortcut(shortcut)
+            except Exception:
+                pass
+
+        self.set_app_instance(None)
+
+        if hasattr(dock_window, "launch_app"):
+            try:
+                dock_window.launch_app(app_data)
+            except Exception:
+                pass
+
     def open_shortcut_dialog(self):
 
         app_id = self._app_id()

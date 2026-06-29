@@ -372,6 +372,7 @@ class DockButtonMenu(QMenu):
         if not hide_default_menu:
             act_info = menu._create_action(title="App Info", icon="info")
             act_shortcut = menu._create_action(title="Shortcut", icon="keyboard")
+            act_reload = menu._create_action(title="Reload App", icon="restart_alt")
             act_open_data_folder = menu._create_action(
                 title="Open App Data Folder", icon="folder_open"
             )
@@ -405,6 +406,9 @@ class DockButtonMenu(QMenu):
         elif selected == act_open_data_folder:
             if hasattr(button, "open_app_data_folder"):
                 button.open_app_data_folder()
+        elif selected == act_reload:
+            if hasattr(button, "reload_app"):
+                button.reload_app()
         elif selected == act_clear_cache:
             if hasattr(button, "clear_app_cache"):
                 if ConfirmDialog.show(

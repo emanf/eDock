@@ -1,7 +1,7 @@
 import os
 import shutil
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import List, Dict
 from ..models import SearchResult
 from .base_provider import BaseProvider
 from ..core.constants import (

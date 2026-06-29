@@ -447,7 +447,10 @@ class Controller:
                 pass
 
             if kind == KIND_LOCAL:
-                decorated["_spotlight_status"] = "enabled"
+                if self._is_app_enabled(result.id):
+                    decorated["_spotlight_status"] = "enabled"
+                else:
+                    decorated["_spotlight_status"] = "installed"
                 decorated["_spotlight_actionable"] = True
                 decorated["_spotlight_action"] = "showcase"
             elif (
