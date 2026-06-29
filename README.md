@@ -5,9 +5,14 @@
 
 # eDock
 
+
 eDock is a simple place for people to build, place, and share small apps.
 
 It started as a long-time idea: a dock where each icon can launch a separate Python app, keeping every app independent and easy to update without changing the others. The project was originally written in AutoIt Script, but it moved to Python because Python fits the idea better and makes the project easier to grow and share.
+
+eDock apps work directly from source, so each app can be shared in its source form and run by eDock without needing to be bundled into a separate build first. This keeps apps simple, flexible, and easy to maintain.
+
+eDock is meant for small tools, simple workflows, and personal apps that stay focused on one job. It is built for people who want a lightweight way to organize apps in a dock-style interface and share them with others.
 
 ---
 # Usage
